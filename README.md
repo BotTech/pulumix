@@ -1,2 +1,3 @@
-# pulumix
-Modules for Pulumi
+# PulumiX
+
+Modules for Pulumi.
