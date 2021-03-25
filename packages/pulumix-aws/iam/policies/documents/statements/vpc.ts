@@ -1,0 +1,57 @@
+import * as aws from "@pulumi/aws";
+import * as statements from "./statements";
+
+// These are from https://docs.aws.amazon.com/vpc/latest/reachability/security_iam_create-iam-policy.html
+
+export function reachabilityAnalyzerFullAccess(): aws.iam.PolicyStatement {
+  return statements.allowActions({
+    Sid: "ReachabilityAnalyzerFullAccess",
+    Action: [
+      "ec2:GetTransitGatewayRouteTablePropagations",
+      "ec2:DescribeTransitGatewayPeeringAttachments",
+      "ec2:SearchTransitGatewayRoutes",
+      "ec2:DescribeTransitGatewayRouteTables",
+      "ec2:DescribeTransitGatewayVpcAttachments",
+      "ec2:DescribeTransitGatewayAttachments",
+      "ec2:DescribeTransitGateways",
+      "ec2:GetManagedPrefixListEntries",
+      "ec2:DescribeManagedPrefixLists",
+      "ec2:DescribeAvailabilityZones",
+      "ec2:DescribeCustomerGateways",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInternetGateways",
+      "ec2:DescribeNatGateways",
+      "ec2:DescribeNetworkAcls",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DescribePrefixLists",
+      "ec2:DescribeRegions",
+      "ec2:DescribeRouteTables",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeVpcEndpoints",
+      "ec2:DescribeVpcPeeringConnections",
+      "ec2:DescribeVpcs",
+      "ec2:DescribeVpnConnections",
+      "ec2:DescribeVpnGateways",
+      "ec2:DescribeVpcEndpointServiceConfigurations",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeRules",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth",
+      "tiros:CreateQuery",
+      "tiros:GetQueryAnswer",
+      "tiros:GetQueryExplanation",
+      "ec2:CreateNetworkInsightsPath",
+      "ec2:DescribeNetworkInsightsPaths",
+      "ec2:DeleteNetworkInsightsPath",
+      "ec2:StartNetworkInsightsAnalysis",
+      "ec2:DescribeNetworkInsightsAnalyses",
+      "ec2:DeleteNetworkInsightsAnalysis",
+      "ec2:CreateTags",
+      "ec2:DeleteTags",
+    ],
+  });
+}
