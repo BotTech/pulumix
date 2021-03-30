@@ -28,20 +28,41 @@ export function forEachInput<A>(
   return pulumi.output(inputs).apply((as) => as?.forEach(f));
 }
 
-type Key = string | number | symbol;
+export type Key = string | number | symbol;
 
-export function mapKeys<A extends Key, B>(
-  record: Record<string, B>,
-  f: (s: string) => A
-): Record<A, B> {
-  return Object.keys(record).reduce((acc, key) => {
-    acc[f(key)] = record[key];
-    return acc;
-  }, {} as Record<A, B>);
+export function mapKeys<A, B extends Key>(
+  record: A | null | undefined,
+  f: (key: keyof A, value: A[keyof A]) => B
+): Record<B, A[keyof A]> {
+  const result = {} as Record<B, A[keyof A]>;
+  if (record) {
+    for (const key in record) {
+      const value = record[key];
+      result[f(key, value)] = value;
+    }
+  }
+  return result;
 }
 
-export function mapKeysToLowerCase<A>(
-  record: Record<string, A>
-): Record<string, A> {
+export function mapKeysToLowerCase<A extends string, B>(
+  record: Record<A, B>
+): Record<string, B> {
   return mapKeys(record, (s) => s.toLowerCase());
+}
+
+export type MappedValues<A, B> = {
+  [Key in keyof A]: B;
+};
+
+export function mapValues<A, B>(
+  record: A | null | undefined,
+  f: (key: keyof A, value: A[keyof A]) => B
+): MappedValues<A, B> {
+  const result = {} as MappedValues<A, B>;
+  if (record) {
+    for (const key in record) {
+      result[key] = f(key, record[key]);
+    }
+  }
+  return result;
 }

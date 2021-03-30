@@ -1,12 +1,12 @@
-import * as pulumi from "@pulumi/pulumi";
-import { Input } from "@pulumi/pulumi";
-import * as aws from "@pulumi/aws";
 import { tags } from "@bottech/pulumix";
+import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
 
 export interface UserArgs {
-  groupNames: Input<string>[];
-  passwordLength: number;
-  pgpKey: Input<string>;
+  allUsersGroupName?: pulumi.Input<string> | null;
+  groupNames: pulumi.Input<string>[];
+  passwordLength: pulumi.Input<number>;
+  pgpKey: pulumi.Input<string>;
 }
 
 export class User extends pulumi.ComponentResource {
@@ -18,7 +18,7 @@ export class User extends pulumi.ComponentResource {
     args: UserArgs,
     opts?: pulumi.CustomResourceOptions
   ) {
-    super("allfiguredout:auth:User", name, {}, opts);
+    super("pulumix-aws:iam:User", name, {}, opts);
 
     const childOpts = { ...opts, parent: this };
 
@@ -32,11 +32,17 @@ export class User extends pulumi.ComponentResource {
       childOpts
     );
 
+    const userGroups = args.groupNames;
+    if (typeof args.allUsersGroupName === "undefined") {
+      userGroups.push("Everyone");
+    } else if (args.allUsersGroupName) {
+      userGroups.push(args.allUsersGroupName);
+    }
     new aws.iam.UserGroupMembership(
       name,
       {
         user: this.user.name,
-        groups: args.groupNames,
+        groups: userGroups,
       },
       childOpts
     );
@@ -50,7 +56,7 @@ export class User extends pulumi.ComponentResource {
         pgpKey: args.pgpKey,
         user: this.user.name,
       },
-      { ...childOpts, aliases: [{ name: "login" }] }
+      childOpts
     );
 
     this.registerOutputs();

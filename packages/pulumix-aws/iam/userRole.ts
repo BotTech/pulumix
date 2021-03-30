@@ -20,7 +20,7 @@ export class UserRole extends pulumi.ComponentResource {
     args: UserRoleArgs,
     opts?: pulumi.CustomResourceOptions
   ) {
-    super("allfiguredout:auth:UserRole", name, {}, opts);
+    super("pulumix-aws:iam:UserRole", name, {}, opts);
 
     const childOpts = { ...opts, parent: this };
 

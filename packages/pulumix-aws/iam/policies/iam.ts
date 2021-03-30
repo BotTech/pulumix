@@ -1,5 +1,5 @@
-import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 import * as documents from "./documents";
 
 export interface AssumeRoleArgs {
@@ -28,6 +28,7 @@ export function assumeRole(
 
 export type EnforceMFAArgs = documents.iam.EnforceMFAArgs;
 
+// TODO: This shouldn't be called enforceMFA as it is actually allowing actions not just enforcing MFA.
 // This policy is from https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage.html.
 export function enforceMFA(
   args: EnforceMFAArgs,

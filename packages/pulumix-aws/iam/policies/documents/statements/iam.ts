@@ -32,13 +32,13 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
   }
 
   allowManageOwnPasswords(
-    allowChangePassword?: boolean
+    allowChangePasswordViaConsole?: boolean
   ): aws.iam.PolicyStatement {
     const allowManageOwnPasswordsActions = [
       "iam:ChangePassword",
       "iam:GetUser",
     ];
-    if (allowChangePassword) {
+    if (allowChangePasswordViaConsole) {
       allowManageOwnPasswordsActions.push(
         "iam:CreateLoginProfile",
         "iam:DeleteLoginProfile",

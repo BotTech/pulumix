@@ -1,6 +1,6 @@
+import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Input } from "@pulumi/pulumi";
-import * as aws from "@pulumi/aws";
 import * as statements from "./statements";
 
 export function assumeRole(roleArn: Input<string>): aws.iam.PolicyDocument {
@@ -10,17 +10,28 @@ export function assumeRole(roleArn: Input<string>): aws.iam.PolicyDocument {
   };
 }
 
-export interface EnforceMFAArgs {
-  allowListUsers?: boolean;
-  allowChangePassword?: boolean;
+export interface EnforceMFAChangePasswordArgs {
+  allowListUsers: true;
+  allowChangePasswordViaConsole?: boolean;
 }
 
+export interface EnforceMFANoChangePasswordArgs {
+  allowListUsers?: false;
+}
+
+export type EnforceMFAArgs =
+  | EnforceMFAChangePasswordArgs
+  | EnforceMFANoChangePasswordArgs;
+
+// TODO: This shouldn't be called enforceMFA as it is actually allowing actions not just enforcing MFA.
 export function enforceMFA(args: EnforceMFAArgs): aws.iam.PolicyDocument {
   return {
     Version: "2012-10-17",
     Statement: [
       statements.iam.allowViewAccountInfo(args.allowListUsers),
-      statements.iam.allowManageOwnPasswords(args.allowChangePassword),
+      statements.iam.allowManageOwnPasswords(
+        args.allowListUsers && args.allowChangePasswordViaConsole
+      ),
       statements.iam.allowManageOwnAccessKeys(),
       statements.iam.allowManageOwnSigningCertificates(),
       statements.iam.allowManageOwnSSHPublicKeys(),
