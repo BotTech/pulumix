@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --build",
+    "clean": "rm -rf dist",
     "test": "echo No tests."
   },
   "author": "Jason Pickens <jasonpickensnz@gmail.com>",

@@ -1,4 +1,4 @@
-import * as accounts from "./accounts";
 import * as iam from "./iam";
-export { accounts, iam };
+import * as organizations from "./organizations";
 export * from "./provider";
+export { organizations, iam };

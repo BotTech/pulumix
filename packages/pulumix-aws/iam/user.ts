@@ -2,12 +2,22 @@ import { tags } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
-export interface UserArgs {
+export interface BaseUserArgs {
   allUsersGroupName?: pulumi.Input<string> | null;
   groupNames: pulumi.Input<string>[];
   passwordLength: pulumi.Input<number>;
+}
+
+export interface ImportUserArgs extends BaseUserArgs {
+  import: true;
+}
+
+export interface NewUserArgs extends BaseUserArgs {
+  import?: false;
   pgpKey: pulumi.Input<string>;
 }
+
+export type UserArgs = ImportUserArgs | NewUserArgs;
 
 export class User extends pulumi.ComponentResource {
   user: aws.iam.User;
@@ -21,6 +31,7 @@ export class User extends pulumi.ComponentResource {
     super("pulumix-aws:iam:User", name, {}, opts);
 
     const childOpts = { ...opts, parent: this };
+    const userOpts = args.import ? { ...childOpts, import: name } : childOpts;
 
     this.user = new aws.iam.User(
       name,
@@ -29,7 +40,7 @@ export class User extends pulumi.ComponentResource {
         tags: tags(),
         forceDestroy: true,
       },
-      childOpts
+      userOpts
     );
 
     const userGroups = args.groupNames;
@@ -53,10 +64,10 @@ export class User extends pulumi.ComponentResource {
         passwordLength: args.passwordLength,
         // Do not require a password reset as the user has not setup MFA yet and will be unable to login.
         passwordResetRequired: false,
-        pgpKey: args.pgpKey,
+        pgpKey: args.import ? "" : args.pgpKey,
         user: this.user.name,
       },
-      childOpts
+      userOpts
     );
 
     this.registerOutputs();

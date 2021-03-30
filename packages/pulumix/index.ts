@@ -56,12 +56,12 @@ export type MappedValues<A, B> = {
 
 export function mapValues<A, B>(
   record: A | null | undefined,
-  f: (key: keyof A, value: A[keyof A]) => B
+  f: (value: A[keyof A], key: keyof A) => B
 ): MappedValues<A, B> {
   const result = {} as MappedValues<A, B>;
   if (record) {
     for (const key in record) {
-      result[key] = f(key, record[key]);
+      result[key] = f(record[key], key);
     }
   }
   return result;

@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces",
     "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "npm run test --workspaces"

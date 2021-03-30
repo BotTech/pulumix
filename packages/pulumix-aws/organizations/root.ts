@@ -3,9 +3,18 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { iam } from "../index";
 
-export interface AdministratorUserArgs {
+export interface AdministratorUserImportArgs {
+  import: true;
+}
+
+export interface AdministratorUserCreateArgs {
+  import?: false;
   pgpKey: string;
 }
+
+export type AdministratorUserArgs =
+  | AdministratorUserImportArgs
+  | AdministratorUserCreateArgs;
 
 export interface OrganizationalUnitArg {
   accounts?: Record<string, aws.organizations.AccountArgs>;
@@ -23,17 +32,13 @@ export class RootAccount extends pulumi.ComponentResource {
   administratorsGroup: aws.iam.Group;
   everyoneGroup: aws.iam.Group;
 
-  constructor(
-    name: string,
-    args?: RootAccountArgs,
-    opts?: pulumi.CustomResourceOptions
-  ) {
-    super("pulumix-aws:accounts:Root", name, {}, opts);
+  constructor(args: RootAccountArgs, opts?: pulumi.CustomResourceOptions) {
+    super("pulumix-aws:accounts:Root", args.organizationName, {}, opts);
 
-    const childOpts = { ...opts, parent: this };
+    const childOpts = { ...opts, parent: this, protect: true };
 
     const passwordPolicy = iam.strongAccountPasswordPolicy(
-      args?.minimumPasswordLength,
+      args.minimumPasswordLength,
       childOpts
     );
 
@@ -79,16 +84,16 @@ export class RootAccount extends pulumi.ComponentResource {
 
     // Users.
 
-    mapValues(args?.administratorUsers, (name, user) => {
+    mapValues(args.administratorUsers, (user, name) => {
       return new iam.User(
         name,
         {
+          ...user,
           allUsersGroupName: this.everyoneGroup.name,
           groupNames: [this.administratorsGroup.name],
           passwordLength: passwordPolicy.minimumPasswordLength.apply(
             (length) => length ?? iam.DefaultPasswordLength
           ),
-          pgpKey: user.pgpKey,
         },
         childOpts
       );
@@ -97,7 +102,7 @@ export class RootAccount extends pulumi.ComponentResource {
     // Organizational Units.
 
     const organization = new aws.organizations.Organization(
-      args?.organizationName ?? name,
+      args.organizationName,
       {
         awsServiceAccessPrincipals: [],
         // Enable everything. What's the harm?
@@ -114,7 +119,7 @@ export class RootAccount extends pulumi.ComponentResource {
 
     const organizationalUnits = organizationalUnitHierarchy(
       organization.roots[0].id,
-      args?.organizationalUnits,
+      args.organizationalUnits,
       childOpts
     );
 
@@ -133,16 +138,136 @@ export class RootAccount extends pulumi.ComponentResource {
   }
 }
 
+export interface ProdNonProdSubOrganizationalUnitsArgs {
+  NonProd?: Record<string, aws.organizations.AccountArgs>;
+  Prod?: Record<string, aws.organizations.AccountArgs>;
+}
+
+export function prodNonProdSubOrganizationalUnits(
+  subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs
+): Record<string, OrganizationalUnitArg> {
+  return mapValues(subOrganizationalUnits, (accounts) => {
+    return { accounts: accounts };
+  });
+}
+
+export function prodNonProdOrganizationalUnit(
+  name: string,
+  subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs
+): Record<string, OrganizationalUnitArg> {
+  return {
+    [name]: {
+      subOrganizationlUnits: prodNonProdSubOrganizationalUnits(
+        subOrganizationalUnits
+      ),
+    },
+  };
+}
+
+export function securityOrganizationalUnit(
+  email: (accountName: string, prod: boolean) => string
+): Record<string, OrganizationalUnitArg> {
+  return prodNonProdOrganizationalUnit("Security", {
+    Prod: {
+      Auth: {
+        email: email("Auth", true),
+      },
+    },
+  });
+}
+
+export function workloadSubOrganizationalUnit(
+  workload: string,
+  email: (accountName: string, prod: boolean) => string
+): ProdNonProdSubOrganizationalUnitsArgs {
+  const nonProdName = `${workload}Test`;
+  const prodName = `${workload}Prod`;
+  return prodNonProdSubOrganizationalUnits({
+    NonProd: {
+      [nonProdName]: {
+        email: email(nonProdName, false),
+      },
+    },
+    Prod: {
+      [prodName]: {
+        email: email(prodName, true),
+      },
+    },
+  });
+}
+
+function mergeProdNonProdSubOrganizationalUnitsArgs(
+  a: ProdNonProdSubOrganizationalUnitsArgs,
+  b: ProdNonProdSubOrganizationalUnitsArgs
+): ProdNonProdSubOrganizationalUnitsArgs {
+  const merge = (key: keyof ProdNonProdSubOrganizationalUnitsArgs) =>
+    a[key] || b[key] ? { [key]: { ...a[key], ...b[key] } } : {};
+  return { ...merge("Prod"), ...merge("NonProd") };
+}
+
+export function workloadsOrganizationalUnit(
+  workloads: string[] = [],
+  email: (accountName: string, prod: boolean) => string
+): Record<string, OrganizationalUnitArg> {
+  return prodNonProdOrganizationalUnit(
+    "Workloads",
+    workloads
+      .map((workload) => {
+        return workloadSubOrganizationalUnit(workload, email);
+      })
+      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {})
+  );
+}
+
+export function deploymentSubOrganizationalUnit(
+  workload: string,
+  email: (accountName: string, prod: boolean) => string
+): ProdNonProdSubOrganizationalUnitsArgs {
+  const prodName = `${workload}Prod`;
+  return prodNonProdSubOrganizationalUnits({
+    Prod: {
+      [prodName]: {
+        email: email(prodName, true),
+      },
+    },
+  });
+}
+
+export function deploymentsOrganizationalUnit(
+  workloads: string[] = [],
+  email: (accountName: string, prod: boolean) => string
+): Record<string, OrganizationalUnitArg> {
+  return prodNonProdOrganizationalUnit(
+    "Deployments",
+    workloads
+      .map((workload) => {
+        return deploymentSubOrganizationalUnit(workload, email);
+      })
+      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {})
+  );
+}
+
+export function recommendedOrganizationalUnits(
+  workloads: string[] = [],
+  email: (accountName: string, prod: boolean) => string
+): Record<string, OrganizationalUnitArg> {
+  return {
+    ...securityOrganizationalUnit(email),
+    ...workloadsOrganizationalUnit(workloads, email),
+    ...deploymentsOrganizationalUnit(workloads, email),
+  };
+}
+
 function organizationalUnitAccounts(
   parentId: pulumi.Input<string>,
   accounts?: Record<string, aws.organizations.AccountArgs>,
   opts?: pulumi.CustomResourceOptions
 ): Record<string, aws.organizations.Account> {
-  return mapValues(accounts, (name, acc) => {
+  return mapValues(accounts, (account, name) => {
     return new aws.organizations.Account(
       name,
       tagged({
-        ...acc,
+        ...account,
         parentId: parentId,
       }),
       opts
@@ -161,7 +286,7 @@ function organizationalUnitHierarchy(
   args: Record<string, OrganizationalUnitArg> | undefined,
   opts: pulumi.CustomResourceOptions
 ): Record<string, OrganizationalUnitResult> {
-  return mapValues(args, (name, unit) => {
+  return mapValues(args, (unit, name) => {
     const organizationalUnit = new aws.organizations.OrganizationalUnit(
       name,
       {
