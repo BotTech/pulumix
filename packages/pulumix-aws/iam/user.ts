@@ -1,10 +1,10 @@
-import { tags } from "@bottech/pulumix";
+import { NameAlternatives, nameProperty, tags } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 export interface BaseUserArgs {
-  allUsersGroupName?: pulumi.Input<string> | null;
-  groupNames: pulumi.Input<string>[];
+  allUsersGroupName?: NameAlternatives | null;
+  groupNames: NameAlternatives[];
   passwordLength: pulumi.Input<number>;
 }
 
@@ -53,7 +53,7 @@ export class User extends pulumi.ComponentResource {
       name,
       {
         user: this.user.name,
-        groups: userGroups,
+        groups: userGroups.map(nameProperty),
       },
       childOpts
     );

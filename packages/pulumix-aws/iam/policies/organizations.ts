@@ -18,18 +18,21 @@ export function fullAccess(
 
 export interface OrganizationAccountAccessArgs {
   id: pulumi.Input<string>;
-  name: pulumi.Input<string>;
+  name: string;
 }
 
 export function assumeOrganizationAccountAccessRole(
   account: OrganizationAccountAccessArgs,
   opts?: pulumi.ComponentResourceOptions
 ): aws.iam.Policy {
-  const roleName = "OrganizationAccountAccessRole";
-  const roleArn = `arn:aws:iam::${account.id}:role/OrganizationAccountAccessRole`;
   return iam.assumeRole(
-    roleName,
-    { roleArn: roleArn, accountName: account.name },
+    {
+      role: {
+        resourceName: "OrganizationAccountAccessRole",
+        arn: pulumi.interpolate`arn:aws:iam::${account.id}:role/OrganizationAccountAccessRole`,
+      },
+      accountName: account.name,
+    },
     opts
   );
 }

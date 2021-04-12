@@ -64,11 +64,7 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    iam.attachGroupPolicies(
-      this.everyoneGroup.name,
-      [enforceMFAPolicy],
-      childOpts
-    );
+    iam.attachGroupPolicies(this.everyoneGroup, [enforceMFAPolicy], childOpts);
 
     this.administratorsGroup = new aws.iam.Group(
       "Administrators",
@@ -76,11 +72,7 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    iam.attachGroupPolicies(
-      this.administratorsGroup.name,
-      adminPolicies,
-      childOpts
-    );
+    iam.attachGroupPolicies(this.administratorsGroup, adminPolicies, childOpts);
 
     // Users.
 
@@ -129,7 +121,7 @@ export class RootAccount extends pulumi.ComponentResource {
     );
 
     iam.attachGroupPolicies(
-      this.administratorsGroup.name,
+      this.administratorsGroup,
       assumeOrgAccountAccessRoles,
       childOpts
     );
@@ -319,12 +311,17 @@ function assumeOrganizationAccountAccessRolePolicies(
   for (const name in organizationalUnits) {
     const unit = organizationalUnits[name];
     results = results.concat(
-      Object.values(unit.accounts).map((account) => {
-        return iam.policies.organizations.assumeOrganizationAccountAccessRole(
-          account,
-          opts
-        );
-      })
+      Object.values(
+        mapValues(unit.accounts, (account, accountName) => {
+          return iam.policies.organizations.assumeOrganizationAccountAccessRole(
+            {
+              id: account.id,
+              name: accountName,
+            },
+            opts
+          );
+        })
+      )
     );
     results = results.concat(
       assumeOrganizationAccountAccessRolePolicies(

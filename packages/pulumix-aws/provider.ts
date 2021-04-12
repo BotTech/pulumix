@@ -1,23 +1,31 @@
-import * as pulumi from "@pulumi/pulumi";
-import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 
-export interface ProviderArgs {
+export interface ProviderUserArgs {
   accountId: Input<string>;
-  roleArn?: Input<string>;
+  roleArn: undefined;
 }
+
+export interface ProviderRoleArgs {
+  accountId: Input<string>;
+  roleArn: Input<string>;
+  userName: Input<string>;
+}
+
+export type ProviderArgs = ProviderUserArgs | ProviderRoleArgs;
 
 export class Provider {
   provider: aws.Provider;
   opts: CustomResourceOptions;
 
   constructor(args: ProviderArgs) {
+    // TODO: Enforce this for certain roles.
+    // https://aws.amazon.com/blogs/security/easily-control-naming-individual-iam-role-sessions/
     const role = args.roleArn
-      ? pulumi.output(args.roleArn).apply((arn) => ({
-          roleArn: arn,
-          sessionName: "PulumiSession",
-          externalId: "PulumiApplication",
-        }))
+      ? {
+        roleArn: args.roleArn,
+        sessionName: args.userName,
+      }
       : undefined;
 
     this.provider = new aws.Provider("main", {

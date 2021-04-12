@@ -1,7 +1,7 @@
+import { forEachInput, tags } from "@bottech/pulumix";
+import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Input } from "@pulumi/pulumi";
-import * as aws from "@pulumi/aws";
-import { tags, forEachInput } from "@bottech/pulumix";
 import * as policies from "./policies";
 
 export interface UserRoleArgs {
@@ -39,8 +39,7 @@ export class UserRole extends pulumi.ComponentResource {
     );
 
     this.assumeRolePolicy = policies.iam.assumeRole(
-      name,
-      { roleArn: this.role.arn },
+      { role: this.role },
       childOpts
     );
 

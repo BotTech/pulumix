@@ -1,26 +1,27 @@
 import * as aws from "@pulumi/aws";
-import { CustomResourceOptions, Input } from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
+import { AWSResourceNameAlternatives, awsResourceNames } from "../../types";
 import * as documents from "./documents";
 
 export interface AssumeRoleArgs {
-  roleArn: Input<string>;
-  accountName?: Input<string>;
+  role: AWSResourceNameAlternatives;
+  accountName?: string;
 }
 
 export function assumeRole(
-  roleName: string,
   args: AssumeRoleArgs,
-  opts?: CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions
 ): aws.iam.Policy {
+  const names = awsResourceNames(args.role);
   const accountSuffix = args.accountName
     ? ` in the ${args.accountName} account`
     : "";
-  const description = `Allows access to assume the ${roleName} role${accountSuffix}.`;
+  const description = `Allows access to assume the ${names.resourceName} role${accountSuffix}.`;
   return new aws.iam.Policy(
-    `Assume${args.accountName ?? ""}${roleName}`,
+    `Assume${args.accountName ?? ""}${names.resourceName}`,
     {
       description: description,
-      policy: documents.iam.assumeRole(args.roleArn),
+      policy: documents.iam.assumeRole(names.arn),
     },
     opts
   );
@@ -32,7 +33,7 @@ export type EnforceMFAArgs = documents.iam.EnforceMFAArgs;
 // This policy is from https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage.html.
 export function enforceMFA(
   args: EnforceMFAArgs,
-  opts?: CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions
 ): aws.iam.Policy {
   return new aws.iam.Policy(
     "EnforceMFA",
@@ -45,7 +46,9 @@ export function enforceMFA(
   );
 }
 
-export function fullAccess(opts?: CustomResourceOptions): aws.iam.Policy {
+export function fullAccess(
+  opts?: pulumi.CustomResourceOptions
+): aws.iam.Policy {
   return new aws.iam.Policy(
     "FullIAMAccess",
     {

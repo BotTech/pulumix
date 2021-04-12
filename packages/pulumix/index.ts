@@ -1,34 +1,17 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Input, Output, Unwrap, UnwrapSimple } from "@pulumi/pulumi";
-
-export interface Tagged {
-  readonly tags?: Input<{ [key: string]: Input<string> }>;
-}
-
-export function tags(): Record<string, Input<string>> {
-  return {
-    "pulumi:Project": pulumi.getProject(),
-    "pulumi:Stack": pulumi.getStack(),
-  };
-}
-
-export function tagged<A extends Tagged>(a: A): A {
-  const newTags = { ...a.tags, ...tags() };
-  return { ...a, tags: newTags };
-}
+import { Key } from "./types";
+export * from "./types";
 
 export function forEachInput<A>(
-  inputs: Input<Input<A>[]> | undefined,
+  inputs: pulumi.Input<pulumi.Input<A>[]> | undefined,
   f: (
-    value: Unwrap<A> | UnwrapSimple<A>,
+    value: pulumi.Unwrap<A> | pulumi.UnwrapSimple<A>,
     index: number,
-    array: (Unwrap<A> | UnwrapSimple<A>)[]
+    array: (pulumi.Unwrap<A> | pulumi.UnwrapSimple<A>)[]
   ) => void
-): Output<void> {
+): pulumi.Output<void> {
   return pulumi.output(inputs).apply((as) => as?.forEach(f));
 }
-
-export type Key = string | number | symbol;
 
 export function mapKeys<A, B extends Key>(
   record: A | null | undefined,
@@ -65,4 +48,28 @@ export function mapValues<A, B>(
     }
   }
   return result;
+}
+
+export function mapRecord<A, B extends Key, C>(
+  record: A | null | undefined,
+  f: (key: keyof A, value: A[keyof A]) => [B, C]
+): Record<B, C> {
+  const result = {} as Record<B, C>;
+  if (record) {
+    for (const key in record) {
+      const value = record[key];
+      const keyValueResult = f(key, value);
+      result[keyValueResult[0]] = keyValueResult[1];
+    }
+  }
+  return result;
+}
+
+export function mapPromise<A, B>(
+  promise: Promise<A>,
+  f: (value: A) => B
+): Promise<B> {
+  return new Promise((resolve, reject) =>
+    promise.then((a) => resolve(f(a))).catch((e) => reject(e))
+  );
 }
