@@ -1,7 +1,7 @@
-import { resourceNames, ResourceNamesAlternatives } from "@bottech/pulumix";
+import { resourceNames, ResourceNames } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { AWSResourceNameAlternatives, awsResourceNames } from "../types";
+import { AWSResourceNames, awsResourceNames } from "../types";
 import * as policies from "./policies";
 
 export * from "./user";
@@ -25,13 +25,17 @@ export function strongAccountPasswordPolicy(
   );
 }
 
+export interface AttachGroupPoliciesArgs {
+  group: ResourceNames;
+  policies: AWSResourceNames[];
+}
+
 export function attachGroupPolicies(
-  group: ResourceNamesAlternatives,
-  policies: AWSResourceNameAlternatives[],
+  args: AttachGroupPoliciesArgs,
   opts?: pulumi.ComponentResourceOptions
 ): aws.iam.GroupPolicyAttachment[] {
-  const groupNames = resourceNames(group);
-  return policies.map((policy) => {
+  const groupNames = resourceNames(args.group);
+  return args.policies.map((policy) => {
     const policyNames = awsResourceNames(policy);
     return new aws.iam.GroupPolicyAttachment(
       `${groupNames.resourceName}${policyNames.resourceName}`,

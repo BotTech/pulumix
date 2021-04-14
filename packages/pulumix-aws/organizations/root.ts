@@ -1,7 +1,7 @@
-import { mapValues, tagged } from "@bottech/pulumix";
+import { mapValues, resourceName, tagged } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { iam } from "../index";
+import { AWSIdentifiedResourceNames, iam, id } from "../index";
 
 export interface AdministratorUserImportArgs {
   import: true;
@@ -44,7 +44,7 @@ export class RootAccount extends pulumi.ComponentResource {
 
     // Policies.
 
-    const adminPolicies = iam.policies.organizationAdministratorPolicies(
+    const adminPolicies = iam.policies.organizations.administratorPolicies(
       childOpts
     );
 
@@ -64,7 +64,10 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    iam.attachGroupPolicies(this.everyoneGroup, [enforceMFAPolicy], childOpts);
+    iam.attachGroupPolicies(
+      { group: this.everyoneGroup, policies: [enforceMFAPolicy] },
+      childOpts
+    );
 
     this.administratorsGroup = new aws.iam.Group(
       "Administrators",
@@ -72,7 +75,10 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    iam.attachGroupPolicies(this.administratorsGroup, adminPolicies, childOpts);
+    iam.attachGroupPolicies(
+      { group: this.administratorsGroup, policies: adminPolicies },
+      childOpts
+    );
 
     // Users.
 
@@ -109,8 +115,12 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
+    const rootOrganization = organization.roots[0];
     const organizationalUnits = organizationalUnitHierarchy(
-      organization.roots[0].id,
+      {
+        id: rootOrganization.id,
+        resourceName: "",
+      },
       args.organizationalUnits,
       childOpts
     );
@@ -121,8 +131,10 @@ export class RootAccount extends pulumi.ComponentResource {
     );
 
     iam.attachGroupPolicies(
-      this.administratorsGroup,
-      assumeOrgAccountAccessRoles,
+      {
+        group: this.administratorsGroup,
+        policies: assumeOrgAccountAccessRoles,
+      },
       childOpts
     );
 
@@ -135,23 +147,15 @@ export interface ProdNonProdSubOrganizationalUnitsArgs {
   Prod?: Record<string, aws.organizations.AccountArgs>;
 }
 
-export function prodNonProdSubOrganizationalUnits(
-  subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs
-): Record<string, OrganizationalUnitArg> {
-  return mapValues(subOrganizationalUnits, (accounts) => {
-    return { accounts: accounts };
-  });
-}
-
 export function prodNonProdOrganizationalUnit(
   name: string,
   subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs
 ): Record<string, OrganizationalUnitArg> {
   return {
     [name]: {
-      subOrganizationlUnits: prodNonProdSubOrganizationalUnits(
-        subOrganizationalUnits
-      ),
+      subOrganizationlUnits: mapValues(subOrganizationalUnits, (accounts) => {
+        return { accounts: accounts };
+      }),
     },
   };
 }
@@ -163,6 +167,7 @@ export function securityOrganizationalUnit(
     Prod: {
       Auth: {
         email: email("Auth", true),
+        iamUserAccessToBilling: "ALLOW",
       },
     },
   });
@@ -174,7 +179,7 @@ export function workloadSubOrganizationalUnit(
 ): ProdNonProdSubOrganizationalUnitsArgs {
   const nonProdName = `${workload}Test`;
   const prodName = `${workload}Prod`;
-  return prodNonProdSubOrganizationalUnits({
+  return {
     NonProd: {
       [nonProdName]: {
         email: email(nonProdName, false),
@@ -185,7 +190,7 @@ export function workloadSubOrganizationalUnit(
         email: email(prodName, true),
       },
     },
-  });
+  };
 }
 
 function mergeProdNonProdSubOrganizationalUnitsArgs(
@@ -216,13 +221,13 @@ export function deploymentSubOrganizationalUnit(
   email: (accountName: string, prod: boolean) => string
 ): ProdNonProdSubOrganizationalUnitsArgs {
   const prodName = `${workload}Prod`;
-  return prodNonProdSubOrganizationalUnits({
+  return {
     Prod: {
       [prodName]: {
         email: email(prodName, true),
       },
     },
-  });
+  };
 }
 
 export function deploymentsOrganizationalUnit(
@@ -251,16 +256,16 @@ export function recommendedOrganizationalUnits(
 }
 
 function organizationalUnitAccounts(
-  parentId: pulumi.Input<string>,
+  parent: AWSIdentifiedResourceNames,
   accounts?: Record<string, aws.organizations.AccountArgs>,
   opts?: pulumi.CustomResourceOptions
 ): Record<string, aws.organizations.Account> {
   return mapValues(accounts, (account, name) => {
     return new aws.organizations.Account(
-      name,
+      `${resourceName(parent)}${name}`,
       tagged({
         ...account,
-        parentId: parentId,
+        parentId: id(parent),
       }),
       opts
     );
@@ -274,28 +279,28 @@ interface OrganizationalUnitResult {
 }
 
 function organizationalUnitHierarchy(
-  parentId: pulumi.Input<string>,
+  parent: AWSIdentifiedResourceNames,
   args: Record<string, OrganizationalUnitArg> | undefined,
   opts: pulumi.CustomResourceOptions
 ): Record<string, OrganizationalUnitResult> {
   return mapValues(args, (unit, name) => {
     const organizationalUnit = new aws.organizations.OrganizationalUnit(
-      name,
+      `${resourceName(parent)}${name}`,
       {
         name: name,
-        parentId: parentId,
+        parentId: id(parent),
       },
       opts
     );
     return {
       accounts: organizationalUnitAccounts(
-        organizationalUnit.id,
+        organizationalUnit,
         unit.accounts,
         opts
       ),
       organizationalUnit: organizationalUnit,
       subOrganizationalUnits: organizationalUnitHierarchy(
-        organizationalUnit.id,
+        organizationalUnit,
         unit.subOrganizationlUnits,
         opts
       ),
@@ -312,12 +317,9 @@ function assumeOrganizationAccountAccessRolePolicies(
     const unit = organizationalUnits[name];
     results = results.concat(
       Object.values(
-        mapValues(unit.accounts, (account, accountName) => {
+        mapValues(unit.accounts, (account) => {
           return iam.policies.organizations.assumeOrganizationAccountAccessRole(
-            {
-              id: account.id,
-              name: accountName,
-            },
+            account,
             opts
           );
         })
