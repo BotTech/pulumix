@@ -1,3 +1,4 @@
+import { ResourceName, resourceName } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { AWSResourceNames, awsResourceNames } from "../../types";
@@ -5,23 +6,22 @@ import * as documents from "./documents";
 
 export interface AssumeRoleArgs {
   role: AWSResourceNames;
-  accountName?: string;
+  accountName?: ResourceName;
 }
 
 export function assumeRole(
   args: AssumeRoleArgs,
   opts?: pulumi.CustomResourceOptions
 ): aws.iam.Policy {
-  const names = awsResourceNames(args.role);
-  const accountSuffix = args.accountName
-    ? ` in the ${args.accountName} account`
-    : "";
-  const description = `Allows access to assume the ${names.resourceName} role${accountSuffix}.`;
+  const roleNames = awsResourceNames(args.role);
+  const accountName = resourceName(args.accountName ?? "");
+  const accountSuffix = accountName ? ` in the ${accountName} account` : "";
+  const description = `Allows access to assume the ${roleNames.resourceName} role${accountSuffix}.`;
   return new aws.iam.Policy(
-    `Assume${args.accountName ?? ""}${names.resourceName}`,
+    `Assume${accountName}${roleNames.resourceName}`,
     {
       description: description,
-      policy: documents.iam.assumeRole(names.arn),
+      policy: documents.iam.assumeRole(roleNames.arn),
     },
     opts
   );

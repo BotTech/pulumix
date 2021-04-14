@@ -1,8 +1,12 @@
+import { toSet } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
+import { principals } from ".";
 import * as conditions from "./conditions";
 import * as statements from "./statements";
 
-// These are from https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html#key-policy-default
+// These should only be used inline as they are not safe to use with all resources ("Resource": "*").
+// These are from https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html#key-policy-default.
 
 function adminAccessAllowActionsArgs() {
   return {
@@ -26,9 +30,9 @@ function adminAccessAllowActionsArgs() {
   };
 }
 
-function userSymmetricKeyAccessAllowActionsArgs() {
+function userSymmetricKeyEncryptAndDecryptAccessAllowActionsArgs() {
   return {
-    Sid: "UserSymmetricKeyAccess",
+    Sid: "UserSymmetricKeyEncryptAndDecryptAccess",
     Action: [
       "kms:Decrypt",
       "kms:DescribeKey",
@@ -39,9 +43,9 @@ function userSymmetricKeyAccessAllowActionsArgs() {
   };
 }
 
-function userAsymmetricKeyEncryptionAccessAllowActionsArgs() {
+function userAsymmetricKeyEncryptAndDecryptAccessAllowActionsArgs() {
   return {
-    Sid: "UserAsymmetricKeyEncryptionAccess",
+    Sid: "UserAsymmetricKeyEncryptAndDecryptAccess",
     Action: [
       "kms:Encrypt",
       "kms:Decrypt",
@@ -59,6 +63,18 @@ function userAsymmetricKeySignAndVerifyAccessAllowActionsArgs() {
   };
 }
 
+function userKeyAccessAllowActionsArgs() {
+  return {
+    Sid: "UserKeyAccess",
+    Action: toSet(
+      userSymmetricKeyEncryptAndDecryptAccessAllowActionsArgs().Action.concat(
+        userAsymmetricKeyEncryptAndDecryptAccessAllowActionsArgs().Action,
+        userAsymmetricKeySignAndVerifyAccessAllowActionsArgs().Action
+      )
+    ),
+  };
+}
+
 function grantServiceAccessAllowActionsArgs() {
   return {
     Sid: "GrantServiceAccess",
@@ -72,39 +88,37 @@ export class KMSAccessPatterns extends statements.AccessPatterns {
 
   constructor() {
     super("KMS", "kms");
-    this.inline = new KMSInlineAccessPatterns();
-  }
-
-  adminAccess(): aws.iam.PolicyStatement {
-    return statements.allowActions(adminAccessAllowActionsArgs());
-  }
-
-  userSymmetricKeyAccess(): aws.iam.PolicyStatement {
-    return statements.allowActions(userSymmetricKeyAccessAllowActionsArgs());
-  }
-
-  userAsymmetricKeyEncryptionAccess(): aws.iam.PolicyStatement {
-    return statements.allowActions(
-      userAsymmetricKeyEncryptionAccessAllowActionsArgs()
-    );
-  }
-
-  userAsymmetricKeySignAndVerifyAccess(): aws.iam.PolicyStatement {
-    return statements.allowActions(
-      userAsymmetricKeySignAndVerifyAccessAllowActionsArgs()
-    );
-  }
-
-  grantServiceAccess(): aws.iam.PolicyStatement {
-    return statements.allowActions(grantServiceAccessAllowActionsArgs());
+    this.inline = new KMSInlineAccessPatterns(this.name, this.prefix);
   }
 }
 
-export class KMSInlineAccessPatterns {
+export class KMSInlineAccessPatterns extends statements.InlineAccessPatterns {
   grantServiceAccess(Principal: statements.Principal): aws.iam.PolicyStatement {
     return statements.inlineAllowActions({
       ...grantServiceAccessAllowActionsArgs(),
       Principal: Principal,
+    });
+  }
+
+  rootAccess(accountId: pulumi.Input<string>): aws.iam.PolicyStatement {
+    return this.fullAccess({
+      Principal: principals.rootAccount(accountId),
+    });
+  }
+
+  administratorAccess(
+    administrators: pulumi.Input<string>[]
+  ): aws.iam.PolicyStatement {
+    return statements.inlineAllowActions({
+      ...adminAccessAllowActionsArgs(),
+      Principal: principals.awsPrincipals(administrators),
+    });
+  }
+
+  userAccess(users: pulumi.Input<string>[]): aws.iam.PolicyStatement {
+    return statements.inlineAllowActions({
+      ...userKeyAccessAllowActionsArgs(),
+      Principal: principals.awsPrincipals(users),
     });
   }
 }

@@ -1,6 +1,23 @@
 import * as pulumi from "@pulumi/pulumi";
+import { LocalWorkspace, Stack } from "@pulumi/pulumi/x/automation";
 import { Key } from "./types";
 export * from "./types";
+
+let _stack: Promise<Stack> | null = null;
+
+export function currentStack() {
+  if (_stack) {
+    _stack = LocalWorkspace.selectStack({
+      stackName: pulumi.getStack(),
+      workDir: ".",
+    });
+  }
+  return _stack;
+}
+
+export function toSet<A>(array: A[]): A[] {
+  return array.filter((value, index, self) => self.indexOf(value) === index);
+}
 
 export function forEachInput<A>(
   inputs: pulumi.Input<pulumi.Input<A>[]> | undefined,
@@ -63,13 +80,4 @@ export function mapRecord<A, B extends Key, C>(
     }
   }
   return result;
-}
-
-export function mapPromise<A, B>(
-  promise: Promise<A>,
-  f: (value: A) => B
-): Promise<B> {
-  return new Promise((resolve, reject) =>
-    promise.then((a) => resolve(f(a))).catch((e) => reject(e))
-  );
 }

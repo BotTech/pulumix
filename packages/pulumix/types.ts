@@ -69,19 +69,3 @@ export function resourceNames(
     name: nameProperty(resourceNames),
   };
 }
-
-export interface Tagged {
-  tags?: pulumi.Input<{ [key: string]: pulumi.Input<string> }>;
-}
-
-export function tags(): Record<string, pulumi.Input<string>> {
-  return {
-    "pulumi:Project": pulumi.getProject(),
-    "pulumi:Stack": pulumi.getStack(),
-  };
-}
-
-export function tagged<A extends Tagged>(a: A): A {
-  const newTags = { ...a.tags, ...tags() };
-  return { ...a, tags: newTags };
-}

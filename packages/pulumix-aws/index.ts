@@ -1,5 +1,6 @@
 import * as iam from "./iam";
+import * as kms from "./kms";
 import * as organizations from "./organizations";
 export * from "./provider";
 export * from "./types";
-export { organizations, iam };
+export { iam, kms, organizations };

@@ -1,4 +1,3 @@
-import { resourceName } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { kms, s3 } from ".";
@@ -30,7 +29,7 @@ export function assumeOrganizationAccountAccessRole(
         resourceName: "OrganizationAccountAccessRole",
         arn: pulumi.interpolate`arn:aws:iam::${accountId}:role/OrganizationAccountAccessRole`,
       },
-      accountName: resourceName(account),
+      accountName: account,
     },
     opts
   );

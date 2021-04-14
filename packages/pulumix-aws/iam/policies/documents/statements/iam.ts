@@ -12,7 +12,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
 
   constructor() {
     super("IAM", "iam");
-    this.inline = new IAMInlineAccessPatterns();
+    this.inline = new IAMInlineAccessPatterns(this.name, this.prefix);
   }
 
   allowViewAccountInfo(allowListUsers?: boolean): aws.iam.PolicyStatement {
@@ -167,7 +167,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
   }
 }
 
-export class IAMInlineAccessPatterns {
+export class IAMInlineAccessPatterns extends statements.InlineAccessPatterns {
   assumeRole(Principal: statements.Principal): aws.iam.PolicyStatement {
     return statements.inlineAllowActions({
       Action: "sts:AssumeRole",

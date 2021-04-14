@@ -1,13 +1,13 @@
 import * as conditions from "./conditions";
 import { IAMAccessPatterns } from "./iam";
 import { KMSAccessPatterns } from "./kms";
+import * as principals from "./principals";
 import * as resources from "./resources";
 import * as statements from "./statements";
 import * as vpc from "./vpc";
 
-export { conditions, resources, vpc };
-
 export * from "./statements";
+export { conditions, principals, resources, vpc };
 
 export const acm = new statements.AccessPatterns("ACM", "acm");
 

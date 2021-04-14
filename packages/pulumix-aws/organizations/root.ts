@@ -1,7 +1,8 @@
-import { mapValues, resourceName, tagged } from "@bottech/pulumix";
+import { mapValues, resourceName } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { AWSIdentifiedResourceNames, iam, id } from "../index";
+import { staticCallerAccountId } from "../caller";
+import { AWSIdentifiedResourceNames, iam, id, kms, tagged } from "../index";
 
 export interface AdministratorUserImportArgs {
   import: true;
@@ -138,7 +139,35 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    this.registerOutputs();
+    // KMS Key.
+
+    kms.secretsProvider().then((arn?: string) => {
+      if (arn) {
+        const key = new aws.kms.Key(
+          "Pulumi",
+          {
+            description: "Pulumi secrets key.",
+            policy: staticCallerAccountId().then((accountId) => {
+              return JSON.stringify(
+                iam.policies.documents.kms.inline.keyAccess({
+                  accountId: accountId,
+                })
+              );
+            }),
+          },
+          { ...childOpts, import: arn }
+        );
+
+        new aws.kms.Alias(
+          "Pulumi",
+          {
+            targetKeyId: key.id,
+            name: "Pulumi",
+          },
+          childOpts
+        );
+      }
+    });
   }
 }
 

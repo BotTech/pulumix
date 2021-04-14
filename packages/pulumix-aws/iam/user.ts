@@ -1,6 +1,7 @@
-import { Name, nameProperty, tags } from "@bottech/pulumix";
+import { Name, nameProperty } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
+import { tags } from "..";
 
 export interface BaseUserArgs {
   allUsersGroupName?: Name | null;
@@ -71,7 +72,5 @@ export class User extends pulumi.ComponentResource {
       },
       userOpts
     );
-
-    this.registerOutputs();
   }
 }

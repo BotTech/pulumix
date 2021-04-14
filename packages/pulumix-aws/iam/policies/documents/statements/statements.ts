@@ -1,19 +1,30 @@
-import { Input } from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
 import * as conditions from "./conditions";
 
-export type Action = Input<string> | Input<Input<string>[]>;
-export type Condition = Input<aws.iam.Conditions>;
-export type Principal = Input<aws.iam.Principal>;
-export type Resource = Input<string> | Input<Input<string>[]>;
-export type Sid = Input<string>;
+export type Action =
+  | pulumi.Input<string>
+  | pulumi.Input<pulumi.Input<string>[]>;
 
-export interface AllowActionsArgs {
+export type Condition = pulumi.Input<aws.iam.Conditions>;
+
+export type Principal = pulumi.Input<aws.iam.Principal>;
+
+export type Resource =
+  | pulumi.Input<string>
+  | pulumi.Input<pulumi.Input<string>[]>;
+
+export type Sid = pulumi.Input<string>;
+
+export interface MfaPresentArg {
+  mfaPresent?: boolean;
+}
+
+export type AllowActionsArgs = {
   Action: Action;
   Condition?: Condition;
   Sid?: Sid;
-  mfaPresent?: boolean;
-}
+} & MfaPresentArg;
 
 export function allowActions(args: AllowActionsArgs): aws.iam.PolicyStatement {
   return allowResourceActions({
@@ -51,6 +62,7 @@ export function allowResourceActions(
 
 export interface InlineAllowActionsArgs extends AllowActionsArgs {
   Principal: Principal;
+  Resource?: Resource;
 }
 
 export function inlineAllowActions(
@@ -61,6 +73,8 @@ export function inlineAllowActions(
     Effect: "Allow",
     Principal: args.Principal,
     Action: args.Action,
+    // Some inline policies still need a resource (e.g. KMS key policies).
+    Resource: args.Resource,
     Condition: conditions.merge(
       args.Condition,
       mfaPresentCondition(args.mfaPresent)
@@ -100,9 +114,7 @@ export function denyAllExceptResourceActions(
   };
 }
 
-export interface AccessPatternArgs {
-  mfaPresent?: boolean;
-}
+export type AccessPatternArgs = MfaPresentArg;
 
 export class AccessPatterns {
   name: string;
@@ -115,7 +127,7 @@ export class AccessPatterns {
 
   fullAccess(args?: AccessPatternArgs): aws.iam.PolicyStatement {
     return allowActions({
-      Sid: `Full${this.name}Access`,
+      Sid: `${this.name}FullAccess`,
       Action: `${this.prefix}:*`,
       mfaPresent: args?.mfaPresent,
     });
@@ -123,7 +135,45 @@ export class AccessPatterns {
 
   readOnlyAccess(args?: AccessPatternArgs): aws.iam.PolicyStatement {
     return allowActions({
-      Sid: `ReadOnly${this.name}Access`,
+      Sid: `${this.name}ReadOnlyAccess`,
+      Action: [
+        `${this.prefix}:Describe*`,
+        `${this.prefix}:Get*`,
+        `${this.prefix}:List*`,
+      ],
+      mfaPresent: args?.mfaPresent,
+    });
+  }
+}
+
+export interface InlineAccessPatternArgs extends AccessPatternArgs {
+  Principal: Principal;
+}
+
+export class InlineAccessPatterns {
+  name: string;
+  prefix: string;
+
+  constructor(name: string, prefix: string) {
+    this.name = name;
+    this.prefix = prefix;
+  }
+
+  fullAccess(args: InlineAccessPatternArgs): aws.iam.PolicyStatement {
+    return inlineAllowActions({
+      Sid: `${this.name}FullAccess`,
+      Principal: args?.Principal,
+      Resource: "*",
+      Action: `${this.prefix}:*`,
+      mfaPresent: args?.mfaPresent,
+    });
+  }
+
+  readOnlyAccess(args: InlineAccessPatternArgs): aws.iam.PolicyStatement {
+    return inlineAllowActions({
+      Sid: `${this.name}ReadOnlyAccess`,
+      Principal: args?.Principal,
+      Resource: "*",
       Action: [
         `${this.prefix}:Describe*`,
         `${this.prefix}:Get*`,

@@ -3,6 +3,7 @@ import {
   resourceName,
   ResourceNameProperty
 } from "@bottech/pulumix";
+import { Tags } from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 export interface ARNProperty {
@@ -56,4 +57,20 @@ export function awsIdentifiedResourceNames(
     resourceName: resourceName(resourceNames),
     id: id(resourceNames),
   };
+}
+
+export interface Tagged {
+  tags?: pulumi.Input<Tags>;
+}
+
+export function tags(): Record<string, pulumi.Input<string>> {
+  return {
+    "pulumi:Project": pulumi.getProject(),
+    "pulumi:Stack": pulumi.getStack(),
+  };
+}
+
+export function tagged<A extends Tagged>(a: A): A {
+  const newTags = { ...a.tags, ...tags() };
+  return { ...a, tags: newTags };
 }
