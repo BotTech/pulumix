@@ -1,20 +1,16 @@
 import * as aws from "@pulumi/aws";
-import * as pulumi from "@pulumi/pulumi";
+import { PolicyStatement } from "@pulumi/aws/iam";
 import * as conditions from "./conditions";
 
-export type Action =
-  | pulumi.Input<string>
-  | pulumi.Input<pulumi.Input<string>[]>;
+export type Action = PolicyStatement["Action"];
 
-export type Condition = pulumi.Input<aws.iam.Conditions>;
+export type Condition = PolicyStatement["Condition"];
 
-export type Principal = pulumi.Input<aws.iam.Principal>;
+export type Principal = PolicyStatement["Principal"];
 
-export type Resource =
-  | pulumi.Input<string>
-  | pulumi.Input<pulumi.Input<string>[]>;
+export type Resource = PolicyStatement["Resource"];
 
-export type Sid = pulumi.Input<string>;
+export type Sid = PolicyStatement["Sid"];
 
 export interface MfaPresentArg {
   mfaPresent?: boolean;

@@ -16,8 +16,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "clean": "npm run clean --workspaces",
-    "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue --fix",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue",
     "test": "npm run test --workspaces"
   },
   "workspaces": [

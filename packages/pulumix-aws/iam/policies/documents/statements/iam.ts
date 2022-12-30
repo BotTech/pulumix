@@ -1,5 +1,5 @@
 import * as aws from "@pulumi/aws";
-import { Input } from "@pulumi/pulumi";
+import { arns, ARNs } from "../../../..";
 import * as conditions from "./conditions";
 import * as resources from "./resources";
 import * as statements from "./statements";
@@ -157,10 +157,10 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
     });
   }
 
-  assumeRole(roleArn: Input<string>): aws.iam.PolicyStatement {
+  assumeRole(roles: ARNs): aws.iam.PolicyStatement {
     return statements.allowResourceActions({
       Action: "sts:AssumeRole",
-      Resource: roleArn,
+      Resource: arns(roles),
       // This doesn't have an MFA condition as it has to go on the role trust policy instead.
       mfaPresent: false,
     });

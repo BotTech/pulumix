@@ -19,20 +19,34 @@ export function fullAccess(
 }
 
 export function assumeOrganizationAccountAccessRole(
-  account: AWSIdentifiedResourceNames,
+  account: AWSIdentifiedResourceNames | AWSIdentifiedResourceNames[],
   opts?: pulumi.ComponentResourceOptions
 ): aws.iam.Policy {
-  const accountId = id(account);
-  return iam.assumeRole(
-    {
-      role: {
-        resourceName: "OrganizationAccountAccessRole",
-        arn: pulumi.interpolate`arn:aws:iam::${accountId}:role/OrganizationAccountAccessRole`,
+  if (Array.isArray(account)) {
+    const roles = account.map((acc) => {
+      const accountId = id(acc);
+      return pulumi.interpolate`arn:aws:iam::${accountId}:role/OrganizationAccountAccessRole`;
+    });
+    return iam.assumeRole(
+      {
+        name: "OrganizationAccountAccessRole",
+        roles: roles,
       },
-      accountName: account,
-    },
-    opts
-  );
+      opts
+    );
+  } else {
+    const accountId = id(account);
+    return iam.assumeRole(
+      {
+        role: {
+          resourceName: "OrganizationAccountAccessRole",
+          arn: pulumi.interpolate`arn:aws:iam::${accountId}:role/OrganizationAccountAccessRole`,
+        },
+        accountName: account,
+      },
+      opts
+    );
+  }
 }
 
 export function administratorPolicies(

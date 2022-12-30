@@ -1,11 +1,25 @@
-import { ResourceName, resourceName } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { AWSResourceNames, awsResourceNames } from "../../types";
+import { ARN, AWSResourceNames, awsResourceNames } from "../../types";
 import * as documents from "./documents";
+import { resourceName, ResourceName } from "@bottech/pulumix";
 
-export interface AssumeRoleArgs {
+export type AssumeRoleArgs = AssumeSingleRoleArgs | AssumeMultipleRolesArgs;
+
+export interface AssumeSingleRoleArgs {
   role: AWSResourceNames;
+  accountName?: ResourceName;
+}
+
+function isAssumeSingleRoleArgs(
+  args: AssumeRoleArgs
+): args is AssumeSingleRoleArgs {
+  return "role" in args;
+}
+
+export interface AssumeMultipleRolesArgs {
+  name: string;
+  roles: pulumi.Input<ARN[]>;
   accountName?: ResourceName;
 }
 
@@ -13,18 +27,30 @@ export function assumeRole(
   args: AssumeRoleArgs,
   opts?: pulumi.CustomResourceOptions
 ): aws.iam.Policy {
-  const roleNames = awsResourceNames(args.role);
   const accountName = resourceName(args.accountName ?? "");
   const accountSuffix = accountName ? ` in the ${accountName} account` : "";
-  const description = `Allows access to assume the ${roleNames.resourceName} role${accountSuffix}.`;
-  return new aws.iam.Policy(
-    `Assume${accountName}${roleNames.resourceName}`,
-    {
-      description: description,
-      policy: documents.iam.assumeRole(roleNames.arn),
-    },
-    opts
-  );
+  if (isAssumeSingleRoleArgs(args)) {
+    const roleNames = awsResourceNames(args.role);
+    const description = `Allows access to assume the ${roleNames.resourceName} role${accountSuffix}.`;
+    return new aws.iam.Policy(
+      `AssumeRole${accountName}${roleNames.resourceName}`,
+      {
+        description: description,
+        policy: documents.iam.assumeRole(roleNames.arn),
+      },
+      opts
+    );
+  } else {
+    const description = `Allows access to assume the ${args.name} roles${accountSuffix}.`;
+    return new aws.iam.Policy(
+      `AssumeRoles${accountName}${args.name}`,
+      {
+        description: description,
+        policy: documents.iam.assumeRole(args.roles),
+      },
+      opts
+    );
+  }
 }
 
 export type EnforceMFAArgs = documents.iam.EnforceMFAArgs;

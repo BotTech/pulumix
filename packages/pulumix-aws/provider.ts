@@ -23,9 +23,9 @@ export class Provider {
     // https://aws.amazon.com/blogs/security/easily-control-naming-individual-iam-role-sessions/
     const role = args.roleArn
       ? {
-        roleArn: args.roleArn,
-        sessionName: args.userName,
-      }
+          roleArn: args.roleArn,
+          sessionName: args.userName,
+        }
       : undefined;
 
     this.provider = new aws.Provider("main", {

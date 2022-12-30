@@ -35,13 +35,13 @@ export class User extends pulumi.ComponentResource {
     const userOpts = args.import ? { ...childOpts, import: name } : childOpts;
     const userArgs = args.import
       ? {
-        name: name,
-      }
+          name: name,
+        }
       : {
-        name: name,
-        tags: tags(),
-        forceDestroy: true,
-      };
+          name: name,
+          tags: tags(),
+          forceDestroy: true,
+        };
 
     this.user = new aws.iam.User(name, userArgs, userOpts);
 

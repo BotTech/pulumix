@@ -1,21 +1,42 @@
-import {
-  inputOrProperty,
-  resourceName,
-  ResourceNameProperty
-} from "@bottech/pulumix";
 import { Tags } from "@pulumi/aws";
-import * as pulumi from "@pulumi/pulumi";
+import {
+  getProject,
+  getStack,
+  Input,
+  Output,
+  output,
+  all,
+  Resource,
+} from "@pulumi/pulumi";
+import {
+  inputPropertyOrElse,
+  resourceName,
+  ResourceNameProperty,
+} from "@bottech/pulumix";
 
 export interface ARNProperty {
-  arn: pulumi.Input<string>;
+  arn: Input<string>;
 }
 
-export type AWSNamedResource = ARNProperty & pulumi.Resource;
+export type AWSNamedResource = ARNProperty & Resource;
 
-export type ARN = pulumi.Input<string> | ARNProperty;
+// TODO: Make more things accept an input.
+export type ARN = Input<string | ARNProperty>;
 
-export function arn(arn: ARN): pulumi.Input<string> {
-  return inputOrProperty(arn, "arn");
+export function arn(arn: ARN): Output<string> {
+  return inputPropertyOrElse<string, ARNProperty, "arn">(arn, "arn");
+}
+
+export type ARNs = Input<ARN | ARN[]>;
+
+export function arns(arns: ARNs): Output<string[]> {
+  return output(arns).apply((arns) => {
+    if (Array.isArray(arns)) {
+      return all(arns.map(arn));
+    } else {
+      return arn(arns).apply((arn) => [arn]);
+    }
+  });
 }
 
 export type AWSResourceNames = AWSResourceNameProperties | AWSNamedResource;
@@ -32,15 +53,15 @@ export function awsResourceNames(
 }
 
 export interface IdProperty {
-  id: pulumi.Input<string>;
+  id: Input<string>;
 }
 
-export type AWSIdentifiedResource = IdProperty & pulumi.Resource;
+export type AWSIdentifiedResource = IdProperty & Resource;
 
-export type Id = pulumi.Input<string> | IdProperty;
+export type Id = Input<string | IdProperty>;
 
-export function id(id: Id): pulumi.Input<string> {
-  return inputOrProperty(id, "id");
+export function id(id: Id): Input<string> {
+  return inputPropertyOrElse<string, IdProperty, "id">(id, "id");
 }
 
 export type AWSIdentifiedResourceNames =
@@ -60,13 +81,13 @@ export function awsIdentifiedResourceNames(
 }
 
 export interface Tagged {
-  tags?: pulumi.Input<Tags>;
+  tags?: Input<Tags>;
 }
 
-export function tags(): Record<string, pulumi.Input<string>> {
+export function tags(): Record<string, Input<string>> {
   return {
-    "pulumi:Project": pulumi.getProject(),
-    "pulumi:Stack": pulumi.getStack(),
+    "pulumi:Project": getProject(),
+    "pulumi:Stack": getStack(),
   };
 }
 

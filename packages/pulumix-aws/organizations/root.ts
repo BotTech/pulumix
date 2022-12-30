@@ -45,9 +45,8 @@ export class RootAccount extends pulumi.ComponentResource {
 
     // Policies.
 
-    const adminPolicies = iam.policies.organizations.administratorPolicies(
-      childOpts
-    );
+    const adminPolicies =
+      iam.policies.organizations.administratorPolicies(childOpts);
 
     const enforceMFAPolicy = iam.policies.iam.enforceMFA(
       {
@@ -126,10 +125,11 @@ export class RootAccount extends pulumi.ComponentResource {
       childOpts
     );
 
-    const assumeOrgAccountAccessRoles = assumeOrganizationAccountAccessRolePolicies(
-      organizationalUnits,
-      childOpts
-    );
+    const assumeOrgAccountAccessRoles =
+      assumeOrganizationAccountAccessRolePolicies(
+        organizationalUnits,
+        childOpts
+      );
 
     iam.attachGroupPolicies(
       {
