@@ -1,5 +1,9 @@
-# Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux,vscode,intellij+all,sublimetext,vim,emacs,node
-# Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,linux,vscode,intellij+all,sublimetext,vim,emacs,node
+# Created by https://www.toptal.com/developers/gitignore/api/vim,node,emacs,linux,macos,windows,sublimetext,intellij+all,direnv
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim,node,emacs,linux,macos,windows,sublimetext,intellij+all,direnv
+
+### direnv ###
+.direnv
+.envrc
 
 ### Emacs ###
 # -*- mode: gitignore; -*-
@@ -15,7 +19,6 @@ tramp
 # Org-mode
 .org-id-locations
 *_archive
-ltximg/**
 
 # flymake-mode
 *_flymake.*
@@ -63,6 +66,9 @@ flycheck_*.el
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
 
 # Generated files
 .idea/**/contentModel.xml
@@ -114,6 +120,9 @@ atlassian-ide-plugin.xml
 # Cursive Clojure plugin
 .idea/replstate.xml
 
+# SonarLint plugin
+.idea/sonarlint/
+
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 crashlytics.properties
@@ -127,20 +136,13 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 ### Intellij+all Patch ###
-# Ignores the whole .idea folder and all .iml files
-# See https://github.com/joeblau/gitignore.io/issues/186 and https://github.com/joeblau/gitignore.io/issues/360
+# Ignore everything but code style settings and run configurations
+# that are supposed to be shared within teams.
 
-.idea/
+.idea/*
 
-# Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
-
-*.iml
-modules.xml
-.idea/misc.xml
-*.ipr
-
-# Sonarlint plugin
-.idea/sonarlint
+!.idea/codeStyles
+!.idea/runConfigurations
 
 ### Linux ###
 
@@ -185,6 +187,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### macOS Patch ###
+# iCloud generated files
+*.icloud
+
 ### Node ###
 # Logs
 logs
@@ -193,6 +199,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.pnpm-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -229,8 +236,8 @@ build/Release
 node_modules/
 jspm_packages/
 
-# TypeScript v1 declaration files
-typings/
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
 
 # TypeScript cache
 *.tsbuildinfo
@@ -259,10 +266,12 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variable files
 .env
-.env.test
-.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -270,17 +279,11 @@ typings/
 
 # Next.js build output
 .next
+out
 
 # Nuxt.js build / generate output
 .nuxt
 dist
-
-# Storybook build outputs
-.out
-.storybook-out
-storybook-static
-
-# rollup.js default build output
 
 # Gatsby files
 .cache/
@@ -290,6 +293,12 @@ storybook-static
 
 # vuepress build output
 .vuepress/dist
+
+# vuepress v2.x temp and cache directory
+.temp
+
+# Docusaurus cache and generated files
+.docusaurus
 
 # Serverless directories
 .serverless/
@@ -306,9 +315,21 @@ storybook-static
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# Temporary folders
-tmp/
-temp/
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+### Node Patch ###
+# Serverless Webpack directories
+.webpack/
+
+# Optional stylelint cache
+
+# SvelteKit build / generate output
+.svelte-kit
 
 ### SublimeText ###
 # Cache files for Sublime Text
@@ -325,6 +346,7 @@ temp/
 
 # SFTP configuration file
 sftp-config.json
+sftp-config-alt*.json
 
 # Package control specific files
 Package Control.last-run
@@ -362,14 +384,6 @@ tags
 # Persistent undo
 [._]*.un~
 
-### vscode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -396,7 +410,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,vscode,intellij+all,sublimetext,vim,emacs,node
-
-# Ignore VSCode history.
-.history
+# End of https://www.toptal.com/developers/gitignore/api/vim,node,emacs,linux,macos,windows,sublimetext,intellij+all,direnv
