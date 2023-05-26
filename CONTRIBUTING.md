@@ -23,8 +23,6 @@ Now install direnv to get things setup automatically when you `cd` to the projec
 1. Install [direnv].
 2. Follow the steps to hook it into your shell.
 
-## 
-
 [direnv]: https://direnv.net/
 [nodenv]: https://github.com/nodenv/nodenv
 [pyenv]: https://github.com/pyenv/pyenv
