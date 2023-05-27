@@ -19,7 +19,7 @@
     "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue --fix",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue",
     "test": "npm run test --workspaces",
-    "upgrade": "npm-check-updates --upgrade --workspaces --root && npm install"
+    "upgrade": "npm-check-updates --upgrade --workspaces --root && npm update"
   },
   "workspaces": [
     "packages/*"
