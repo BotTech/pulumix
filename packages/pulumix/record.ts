@@ -1,4 +1,5 @@
-export type Key = string | number | symbol;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Key = keyof any;
 
 export function hasKey<K extends Key>(
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
@@ -10,15 +11,13 @@ export function hasKey<K extends Key>(
 }
 
 export function mapKeys<A, B extends Key>(
-  record: A | null | undefined,
+  record: A,
   f: (key: keyof A, value: A[keyof A]) => B
 ): Record<B, A[keyof A]> {
   const result = {} as Record<B, A[keyof A]>;
-  if (record) {
-    for (const key in record) {
-      const value = record[key];
-      result[f(key, value)] = value;
-    }
+  for (const key in record) {
+    const value = record[key];
+    result[f(key, value)] = value;
   }
   return result;
 }
@@ -34,29 +33,25 @@ export type MappedValues<A, B> = {
 };
 
 export function mapValues<A, B>(
-  record: A | null | undefined,
+  record: A,
   f: (value: A[keyof A], key: keyof A) => B
 ): MappedValues<A, B> {
   const result = {} as MappedValues<A, B>;
-  if (record) {
-    for (const key in record) {
-      result[key] = f(record[key], key);
-    }
+  for (const key in record) {
+    result[key] = f(record[key], key);
   }
   return result;
 }
 
 export function mapRecord<A, B extends Key, C>(
-  record: A | null | undefined,
+  record: A,
   f: (key: keyof A, value: A[keyof A]) => [B, C]
 ): Record<B, C> {
   const result = {} as Record<B, C>;
-  if (record) {
-    for (const key in record) {
-      const value = record[key];
-      const keyValueResult = f(key, value);
-      result[keyValueResult[0]] = keyValueResult[1];
-    }
+  for (const key in record) {
+    const value = record[key];
+    const keyValueResult = f(key, value);
+    result[keyValueResult[0]] = keyValueResult[1];
   }
   return result;
 }

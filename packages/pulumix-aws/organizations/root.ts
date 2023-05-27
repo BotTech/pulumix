@@ -289,6 +289,9 @@ function organizationalUnitAccounts(
   accounts?: Record<string, aws.organizations.AccountArgs>,
   opts?: pulumi.CustomResourceOptions
 ): Record<string, aws.organizations.Account> {
+  if (accounts === undefined) {
+    return {};
+  }
   return mapValues(accounts, (account, name) => {
     return new aws.organizations.Account(
       `${resourceName(parent)}${name}`,
@@ -309,10 +312,13 @@ interface OrganizationalUnitResult {
 
 function organizationalUnitHierarchy(
   parent: AWSIdentifiedResourceNames,
-  args: Record<string, OrganizationalUnitArg> | undefined,
-  opts: pulumi.CustomResourceOptions
+  organizationalUnits?: Record<string, OrganizationalUnitArg>,
+  opts?: pulumi.CustomResourceOptions
 ): Record<string, OrganizationalUnitResult> {
-  return mapValues(args, (unit, name) => {
+  if (organizationalUnits === undefined) {
+    return {};
+  }
+  return mapValues(organizationalUnits, (unit, name) => {
     const organizationalUnit = new aws.organizations.OrganizationalUnit(
       `${resourceName(parent)}${name}`,
       {

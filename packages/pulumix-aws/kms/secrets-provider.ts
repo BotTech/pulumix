@@ -12,9 +12,7 @@ async function getKmsKeyId(): Promise<string | undefined> {
         return `${url.host}${url.pathname}`;
       }
     } catch (e) {
-      if (e.code != "ERR_INVALID_URL") {
-        throw e;
-      }
+      return;
     }
   }
 }
