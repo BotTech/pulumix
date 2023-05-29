@@ -22,19 +22,27 @@ export interface OrganizationalUnitArg {
   subOrganizationlUnits?: Record<string, OrganizationalUnitArg>;
 }
 
-export interface RootAccountArgs {
+export interface ManagementAccountArgs {
   administratorUsers: Record<string, AdministratorUserArgs>;
   minimumPasswordLength?: pulumi.Input<number>;
   organizationName: string;
   organizationalUnits: Record<string, OrganizationalUnitArg>;
 }
 
-export class RootAccount extends pulumi.ComponentResource {
+export class ManagementAccount extends pulumi.ComponentResource {
   administratorsGroup: aws.iam.Group;
   everyoneGroup: aws.iam.Group;
 
-  constructor(args: RootAccountArgs, opts?: pulumi.CustomResourceOptions) {
-    super("pulumix-aws:accounts:Root", args.organizationName, {}, opts);
+  constructor(
+    args: ManagementAccountArgs,
+    opts?: pulumi.CustomResourceOptions
+  ) {
+    super(
+      "pulumix-aws:organizations:ManagementAccount",
+      args.organizationName,
+      {},
+      opts
+    );
 
     const childOpts = { ...opts, parent: this, protect: true };
 

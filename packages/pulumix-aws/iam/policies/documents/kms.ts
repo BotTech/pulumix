@@ -20,7 +20,7 @@ function accountGrantServiceAccess(
     Version: "2012-10-17",
     Statement: [
       statements.kms.inline.grantServiceAccess(
-        statements.principals.rootAccount(accountId)
+        statements.principals.rootUser(accountId)
       ),
     ],
   };

@@ -102,7 +102,7 @@ export class KMSInlineAccessPatterns extends statements.InlineAccessPatterns {
 
   rootAccess(accountId: pulumi.Input<string>): aws.iam.PolicyStatement {
     return this.fullAccess({
-      Principal: principals.rootAccount(accountId),
+      Principal: principals.rootUser(accountId),
     });
   }
 

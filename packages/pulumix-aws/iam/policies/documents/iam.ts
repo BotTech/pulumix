@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
-import * as pulumi from "@pulumi/pulumi";
 import { Input } from "@pulumi/pulumi";
 import { ARNs } from "../../../types";
 import * as statements from "./statements";
+import { rootUser } from "./statements/principals";
 
 export function assumeRole(roleArns: ARNs): aws.iam.PolicyDocument {
   return {
@@ -69,11 +69,7 @@ function serviceAssumeRole(service: Input<string>): aws.iam.PolicyDocument {
 function accountAssumeRole(accountId: Input<string>): aws.iam.PolicyDocument {
   return {
     Version: "2012-10-17",
-    Statement: [
-      statements.iam.inline.assumeRole({
-        AWS: pulumi.interpolate`arn:aws:iam::${accountId}:root`,
-      }),
-    ],
+    Statement: [statements.iam.inline.assumeRole(rootUser(accountId))],
   };
 }
 

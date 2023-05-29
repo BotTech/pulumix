@@ -11,8 +11,6 @@ export function awsPrincipals(
   return { AWS: arns };
 }
 
-export function rootAccount(
-  accoundId: pulumi.Input<string>
-): aws.iam.Principal {
+export function rootUser(accoundId: pulumi.Input<string>): aws.iam.Principal {
   return awsPrincipal(pulumi.interpolate`arn:aws:iam::${accoundId}:root`);
 }
