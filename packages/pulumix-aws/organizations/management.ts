@@ -30,6 +30,7 @@ export interface ManagementAccountArgs {
 }
 
 export class ManagementAccount extends pulumi.ComponentResource {
+  accountId: pulumi.Output<string>;
   administratorsGroup: aws.iam.Group;
   everyoneGroup: aws.iam.Group;
 
@@ -122,6 +123,7 @@ export class ManagementAccount extends pulumi.ComponentResource {
       },
       childOpts
     );
+    this.accountId = organization.masterAccountId;
 
     const rootOrganization = organization.roots[0];
     const organizationalUnits = organizationalUnitHierarchy(
