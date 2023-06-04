@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
 import { Input } from "@pulumi/pulumi";
-import { ARNs } from "../../../types";
+import { ARNs } from "@src/types";
 import * as statements from "./statements";
-import { rootUser } from "./statements/principals";
+import { awsPrincipals, rootUser } from "./statements/principals";
 
 export function assumeRole(roleArns: ARNs): aws.iam.PolicyDocument {
   return {
@@ -73,7 +73,15 @@ function accountAssumeRole(accountId: Input<string>): aws.iam.PolicyDocument {
   };
 }
 
+function groupAssumeRole(groupArns: ARNs): aws.iam.PolicyDocument {
+  return {
+    Version: "2012-10-17",
+    Statement: [statements.iam.inline.assumeRole(awsPrincipals(groupArns))],
+  };
+}
+
 export const inline = {
-  serviceAssumeRole: serviceAssumeRole,
-  accountAssumeRole: accountAssumeRole,
+  serviceAssumeRole,
+  accountAssumeRole,
+  groupAssumeRole,
 };

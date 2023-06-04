@@ -3,11 +3,12 @@ import { IAMAccessPatterns } from "./iam";
 import { KMSAccessPatterns } from "./kms";
 import * as principals from "./principals";
 import * as resources from "./resources";
+import * as s3 from "./s3";
 import * as statements from "./statements";
 import * as vpc from "./vpc";
 
 export * from "./statements";
-export { conditions, principals, resources, vpc };
+export { conditions, principals, resources, s3, vpc };
 
 export const acm = new statements.AccessPatterns("ACM", "acm");
 
@@ -83,8 +84,6 @@ export const organizations = new statements.AccessPatterns(
 );
 
 export const route53 = new statements.AccessPatterns("Route53", "route53");
-
-export const s3 = new statements.AccessPatterns("S3", "s3");
 
 export const secretsManager = new statements.AccessPatterns(
   "SecretsManager",

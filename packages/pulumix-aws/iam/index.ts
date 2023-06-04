@@ -1,11 +1,11 @@
 import { resourceNames, ResourceNames } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { AWSResourceNames, awsResourceNames } from "../types";
+import { AWSResourceNames, awsResourceNames } from "@src/types";
 import * as policies from "./policies";
 
 export * from "./user";
-export * from "./userRole";
+export * from "./user-role";
 export { policies };
 
 export const DefaultPasswordLength = 20;

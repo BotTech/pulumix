@@ -1,14 +1,13 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Input, output } from "@pulumi/pulumi";
-import { arns, ARNs, tags } from "..";
+import { Input } from "@pulumi/pulumi";
+import { arns, ARNs, tags } from "@src";
 import * as policies from "./policies";
 
 export interface UserRoleArgs {
-  accountId: Input<string>;
   description: Input<string>;
-  policyArns?: ARNs;
-  groupNames?: Input<Input<string>[]>;
+  policyArns: ARNs;
+  groupArns: ARNs;
 }
 
 export class UserRole extends pulumi.ComponentResource {
@@ -30,8 +29,8 @@ export class UserRole extends pulumi.ComponentResource {
         description: args.description,
         path: "/user/",
         name: name,
-        assumeRolePolicy: policies.documents.iam.inline.accountAssumeRole(
-          args.accountId
+        assumeRolePolicy: policies.documents.iam.inline.groupAssumeRole(
+          args.groupArns
         ),
         tags: tags(),
       },
@@ -61,20 +60,21 @@ export class UserRole extends pulumi.ComponentResource {
       );
     }
 
-    if (args.groupNames !== undefined) {
-      output(args.groupNames).apply((groupNames) =>
-        groupNames.map(
-          (groupName, i) =>
-            new aws.iam.GroupPolicyAttachment(
-              `${name}${i}`,
-              {
-                group: groupName,
-                policyArn: this.assumeRolePolicy.arn,
-              },
-              childOpts
-            )
-        )
-      );
-    }
+    // I'm pretty sure this doesn't work. The group must be in the assumeRolePolicy policy on the role.
+    // if (args.groupNames !== undefined) {
+    //   output(args.groupNames).apply((groupNames) =>
+    //     groupNames.map(
+    //       (groupName, i) =>
+    //         new aws.iam.GroupPolicyAttachment(
+    //           `${name}${i}`,
+    //           {
+    //             group: groupName,
+    //             policyArn: this.assumeRolePolicy.arn,
+    //           },
+    //           childOpts
+    //         )
+    //     )
+    //   );
+    // }
   }
 }

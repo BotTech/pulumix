@@ -1,5 +1,5 @@
 import * as aws from "@pulumi/aws";
-import { arns, ARNs } from "../../../..";
+import { arns, ARNs } from "@src";
 import * as conditions from "./conditions";
 import * as resources from "./resources";
 import * as statements from "./statements";
@@ -168,10 +168,10 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
 }
 
 export class IAMInlineAccessPatterns extends statements.InlineAccessPatterns {
-  assumeRole(Principal: statements.Principal): aws.iam.PolicyStatement {
+  assumeRole(principal: statements.Principal): aws.iam.PolicyStatement {
     return statements.inlineAllowActions({
       Action: "sts:AssumeRole",
-      Principal: Principal,
+      Principal: principal,
     });
   }
 }
