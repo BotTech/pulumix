@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { kms, s3 } from ".";
-import { AWSIdentifiedResourceNames, id } from "base/types";
+import { kms, s3 } from "./index";
+import { AWSIdentifiedResourceNames, id } from "~/src/types";
 import * as documents from "./documents";
 import * as iam from "./iam";
 

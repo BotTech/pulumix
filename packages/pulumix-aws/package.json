@@ -2,10 +2,14 @@
   "name": "@bottech/pulumix-aws",
   "version": "0.1.0",
   "description": "Pulumi AWS extension module.",
+  "source": "src/index.ts",
   "main": "dist/index.js",
+  "module": "dist/module.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "parcel build",
+    "watch": "parcel watch",
     "clean": "rm -rf dist",
+    "check": "tsc --noEmit",
     "test": "echo No tests."
   },
   "author": "Jason Pickens <jasonpickensnz@gmail.com>",

@@ -1,0 +1,8 @@
+{
+  "extends": "../../.parcelrc",
+  "validators": {
+    "*.{ts,tsx}": [
+      "@parcel/validator-typescript"
+    ]
+  }
+}

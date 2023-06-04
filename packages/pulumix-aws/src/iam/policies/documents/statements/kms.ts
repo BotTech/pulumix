@@ -1,7 +1,7 @@
 import { toSet } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { principals } from ".";
+import { principals } from "./index";
 import * as conditions from "./conditions";
 import * as statements from "./statements";
 
