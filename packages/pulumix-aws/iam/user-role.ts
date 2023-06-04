@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Input } from "@pulumi/pulumi";
-import { arns, ARNs, tags } from "@src/index";
+import { arns, ARNs, tags } from "base/index";
 import * as policies from "./policies";
 
 export interface UserRoleArgs {

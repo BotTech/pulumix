@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { arns, ARNs } from "@src/types";
+import { arns, ARNs } from "base/types";
 
 export function awsPrincipals(principalARNs: ARNs): aws.iam.AWSPrincipal {
   return { AWS: arns(principalARNs) };

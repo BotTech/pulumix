@@ -1,7 +1,7 @@
 import { Name, nameProperty } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { tags } from "@src/index";
+import { tags } from "base/index";
 
 export interface BaseUserArgs {
   allUsersGroupName?: Name | null;

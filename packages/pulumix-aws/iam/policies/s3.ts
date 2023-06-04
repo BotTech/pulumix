@@ -4,7 +4,7 @@ import * as documents from "./documents";
 import {
   bucketName,
   CreateBucketArgs,
-} from "@src/iam/policies/documents/statements/s3";
+} from "base/iam/policies/documents/statements/s3";
 
 export function fullAccess(
   opts?: pulumi.CustomResourceOptions

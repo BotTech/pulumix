@@ -1,7 +1,7 @@
 import { resourceNames, ResourceNames } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { AWSResourceNames, awsResourceNames } from "@src/types";
+import { AWSResourceNames, awsResourceNames } from "base/types";
 import * as policies from "./policies";
 
 export * from "./user";
