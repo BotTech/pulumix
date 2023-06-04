@@ -1,5 +1,5 @@
 import * as aws from "@pulumi/aws";
-import { arns, ARNs } from "@src";
+import { arns, ARNs } from "@src/index";
 import * as conditions from "./conditions";
 import * as resources from "./resources";
 import * as statements from "./statements";
