@@ -1,14 +1,3 @@
 {
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "outDir": "dist",
-    "declaration": true,
-    "strict": true,
-    "isolatedModules": true,
-    "paths": {
-      "~/*": ["./*"]
-    }
-  }
+  "extends": "../../tsconfig.json",
 }

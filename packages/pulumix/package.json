@@ -2,9 +2,12 @@
   "name": "@bottech/pulumix",
   "version": "0.1.0",
   "description": "Pulumi extension module.",
+  "author": "Jason Pickens <jasonpickensnz@gmail.com>",
+  "license": "MIT",
   "source": "src/index.ts",
   "main": "dist/index.js",
   "module": "dist/module.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "parcel build",
     "watch": "parcel watch",
@@ -12,12 +15,7 @@
     "check": "tsc --noEmit",
     "test": "echo No tests."
   },
-  "author": "Jason Pickens <jasonpickensnz@gmail.com>",
-  "devDependencies": {
-    "@pulumi/pulumi": "3.68.0",
-    "typescript": "5.0.4"
-  },
-  "peerDependencies": {
-    "@pulumi/pulumi": "3.9.1"
+  "dependencies": {
+    "@pulumi/pulumi": "3.68.0"
   }
 }
