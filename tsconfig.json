@@ -1,25 +1,8 @@
 {
-  "include": [
-    "src/**/*"
-  ],
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "outDir": "dist",
     "declaration": true,
-    "strict": true,
-    "isolatedModules": true,
-    "paths": {
-      "~/*": [
-        "./*"
-      ]
-    },
-    "types": [
-      "json-schema",
-      "json5",
-      "long",
-      "node",
-      "semver"
-    ]
+    "strict": true
   }
 }

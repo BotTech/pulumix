@@ -9,10 +9,9 @@
   "module": "dist/module.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "parcel build",
-    "watch": "parcel watch",
-    "clean": "rm -rf dist",
+    "build": "tsc --build",
     "check": "tsc --noEmit",
+    "clean": "rm -rf dist",
     "test": "echo No tests."
   },
   "dependencies": {
