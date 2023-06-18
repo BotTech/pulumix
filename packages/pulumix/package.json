@@ -4,14 +4,13 @@
   "description": "Pulumi extension module.",
   "author": "Jason Pickens <jasonpickensnz@gmail.com>",
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "main": "dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
     "./*": "./dist/src/*.js"
   },
   "scripts": {
-    "build": "tsc --build && tsc-alias",
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "test": "echo No tests."
