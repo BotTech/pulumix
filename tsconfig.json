@@ -1,8 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "declaration": true,
-    "strict": true
-  }
+  "files": [],
+  "include": [],
+  "references": [
+    { "path": "./packages/pulumix" },
+    { "path": "./packages/pulumix-aws" }
+  ]
 }

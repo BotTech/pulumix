@@ -126,6 +126,9 @@ export class ManagementAccount extends pulumi.ComponentResource {
     this.accountId = organization.masterAccountId;
 
     const rootOrganization = organization.roots[0];
+    if (rootOrganization === undefined) {
+      throw "organization.roots[0] was undefined.";
+    }
     const organizationalUnits = organizationalUnitHierarchy(
       {
         id: rootOrganization.id,
@@ -360,22 +363,24 @@ function assumeOrganizationAccountAccessRolePolicies(
   let results = [] as aws.iam.Policy[];
   for (const name in organizationalUnits) {
     const unit = organizationalUnits[name];
-    results = results.concat(
-      Object.values(
-        mapValues(unit.accounts, (account) => {
-          return iam.policies.organizations.assumeOrganizationAccountAccessRole(
-            account,
-            opts
-          );
-        })
-      )
-    );
-    results = results.concat(
-      assumeOrganizationAccountAccessRolePolicies(
-        unit.subOrganizationalUnits,
-        opts
-      )
-    );
+    if (unit !== undefined) {
+      results = results.concat(
+        Object.values(
+          mapValues(unit.accounts, (account) => {
+            return iam.policies.organizations.assumeOrganizationAccountAccessRole(
+              account,
+              opts
+            );
+          })
+        )
+      );
+      results = results.concat(
+        assumeOrganizationAccountAccessRolePolicies(
+          unit.subOrganizationalUnits,
+          opts
+        )
+      );
+    }
   }
   return results;
 }

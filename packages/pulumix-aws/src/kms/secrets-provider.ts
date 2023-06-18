@@ -15,6 +15,7 @@ async function getKmsKeyId(): Promise<string | undefined> {
       return;
     }
   }
+  return undefined;
 }
 
 export async function secretsProvider(): Promise<string | undefined> {
@@ -23,4 +24,5 @@ export async function secretsProvider(): Promise<string | undefined> {
     const result = await aws.kms.getKey({ keyId: keyId });
     return result.arn;
   }
+  return undefined;
 }

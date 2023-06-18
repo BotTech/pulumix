@@ -19,10 +19,8 @@ export function merge(
         for (const key in b2) {
           const aOperator = a2[key];
           const bOperator = b2[key];
-          if (aOperator) {
+          if (aOperator !== undefined) {
             result[key] = mergeOperator(aOperator, bOperator);
-          } else {
-            result[key] = bOperator;
           }
         }
         return result;
@@ -46,10 +44,8 @@ function mergeOperator(
     for (const key in b) {
       const aValue = a[key];
       const bValue = b[key];
-      if (aValue) {
+      if (aValue !== undefined) {
         result[key] = mergeValue(aValue, bValue);
-      } else {
-        result[key] = bValue;
       }
     }
     return result;

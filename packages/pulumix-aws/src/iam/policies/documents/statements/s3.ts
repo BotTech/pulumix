@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as statements from "./statements";
 import { AccessPatternArgs, allowResourceActions } from "./statements";
-import { Input, Output } from "@pulumi/pulumi";
+import { Input } from "@pulumi/pulumi";
 import * as pulumi from "@pulumi/pulumi";
 
 type BucketArgs = {

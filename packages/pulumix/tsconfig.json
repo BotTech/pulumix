@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig-base",
   "include": [
     "src/**/*"
   ],
@@ -10,5 +10,6 @@
         "./*"
       ]
     }
-  }
+  },
+  "references": []
 }
