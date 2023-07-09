@@ -15,7 +15,7 @@
     "clean": "rm -rf dist",
     "test": "echo No tests."
   },
-  "dependencies": {
-    "@pulumi/pulumi": "3.68.0"
+  "peerDependencies": {
+    "@pulumi/pulumi": "^3.74.0"
   }
 }
