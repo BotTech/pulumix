@@ -2,7 +2,7 @@ import * as conditions from "./conditions";
 import { IAMAccessPatterns } from "./iam";
 import { KMSAccessPatterns } from "./kms";
 import * as principals from "./principals";
-import * as resources from "./resources";
+import * as resources from "../../../../resources";
 import * as s3 from "./s3";
 import * as statements from "./statements";
 import * as vpc from "./vpc";
@@ -14,47 +14,47 @@ export const acm = new statements.AccessPatterns("ACM", "acm");
 
 export const apiGateway = new statements.AccessPatterns(
   "APIGateway",
-  "apigateway"
+  "apigateway",
 );
 
 export const autoScaling = new statements.AccessPatterns(
   "AutoScaling",
-  "autoscaling"
+  "autoscaling",
 );
 
 export const cloudFront = new statements.AccessPatterns(
   "CloudFront",
-  "cloudfront"
+  "cloudfront",
 );
 
 export const cloudTrail = new statements.AccessPatterns(
   "CloudTrail",
-  "cloudtrail"
+  "cloudtrail",
 );
 
 export const cloudWatch = new statements.AccessPatterns(
   "CloudWatch",
-  "cloudwatch"
+  "cloudwatch",
 );
 
 export const codeBuild = new statements.AccessPatterns(
   "CodeBuild",
-  "codebuild"
+  "codebuild",
 );
 
 export const codeDeploy = new statements.AccessPatterns(
   "CodeDeploy",
-  "codedeploy"
+  "codedeploy",
 );
 
 export const codePipeline = new statements.AccessPatterns(
   "CodePipeline",
-  "codepipeline"
+  "codepipeline",
 );
 
 export const codeStarConnections = new statements.AccessPatterns(
   "CodeStarConnections",
-  "codestar-connections"
+  "codestar-connections",
 );
 
 export const ec2 = new statements.AccessPatterns("EC2", "ec2");
@@ -63,7 +63,7 @@ export const ecs = new statements.AccessPatterns("ECS", "ecs");
 
 export const elasticLoadBalancing = new statements.AccessPatterns(
   "ELB",
-  "elasticloadbalancing"
+  "elasticloadbalancing",
 );
 
 export const events = new statements.AccessPatterns("Events", "events");
@@ -80,14 +80,14 @@ export const logs = new statements.AccessPatterns("Logs", "logs");
 
 export const organizations = new statements.AccessPatterns(
   "Organizations",
-  "organizations"
+  "organizations",
 );
 
 export const route53 = new statements.AccessPatterns("Route53", "route53");
 
 export const secretsManager = new statements.AccessPatterns(
   "SecretsManager",
-  "secretsmanager"
+  "secretsmanager",
 );
 
 export const ssm = new statements.AccessPatterns("SSM", "ssm");

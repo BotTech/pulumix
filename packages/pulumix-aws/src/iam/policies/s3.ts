@@ -2,7 +2,7 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as documents from "./documents";
 import {
-  bucketName,
+  bucketResource,
   CreateBucketArgs,
 } from "~/src/iam/policies/documents/statements/s3";
 
@@ -27,7 +27,7 @@ export function createBucket(
   return new aws.iam.Policy(
     name,
     {
-      description: pulumi.interpolate`Allows access to create the bucket ${bucketName(
+      description: pulumi.interpolate`Allows access to create the bucket ${bucketResource(
         args
       )}`,
       policy: documents.s3.createBucket(args),

@@ -7,14 +7,13 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:workspaces/recommended",
-    "plugin:prettier/recommended",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 12,
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "workspaces", "prettier"],
+  plugins: ["@typescript-eslint", "workspaces"],
   rules: {
     semi: ["error", "always"],
     // Set this to warning to workaround https://github.com/joshuajaco/eslint-plugin-workspaces/issues/11

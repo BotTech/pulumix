@@ -15,6 +15,9 @@
     "clean": "rm -rf dist",
     "test": "echo No tests."
   },
+  "dependencies": {
+    "@bottech/pulumix": "0.1.0"
+  },
   "peerDependencies": {
     "@pulumi/aws": "^5.41.0",
     "@pulumi/pulumi": "^3.74.0"

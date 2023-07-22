@@ -7,7 +7,7 @@ export function hasKey<K extends Key>(
   key: K
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): val is { [P in K]: any } {
-  return key in val;
+  return typeof val === 'object' && key in val;
 }
 
 export function mapKeys<A, B extends Key>(

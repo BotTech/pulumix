@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import { Input } from "@pulumi/pulumi";
-import { ARNs } from "~/src/types";
+import { ARNs } from "~/src";
 import * as statements from "./statements";
 import { awsPrincipals, rootUser } from "./statements/principals";
 

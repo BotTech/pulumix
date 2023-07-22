@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { ARN, AWSResourceNames, awsResourceNames } from "../../types";
+import { ARN, AWSResourceNames, awsResourceNames } from "~/src";
 import * as documents from "./documents";
 import { resourceName, ResourceName } from "@bottech/pulumix";
 
@@ -12,7 +12,7 @@ export interface AssumeSingleRoleArgs {
 }
 
 function isAssumeSingleRoleArgs(
-  args: AssumeRoleArgs
+  args: AssumeRoleArgs,
 ): args is AssumeSingleRoleArgs {
   return "role" in args;
 }
@@ -25,7 +25,7 @@ export interface AssumeMultipleRolesArgs {
 
 export function assumeRole(
   args: AssumeRoleArgs,
-  opts?: pulumi.CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions,
 ): aws.iam.Policy {
   const accountName = resourceName(args.accountName ?? "");
   const accountSuffix = accountName ? ` in the ${accountName} account` : "";
@@ -38,7 +38,7 @@ export function assumeRole(
         description: description,
         policy: documents.iam.assumeRole(roleNames.arn),
       },
-      opts
+      opts,
     );
   } else {
     const description = `Allows access to assume the ${args.name} roles${accountSuffix}.`;
@@ -48,7 +48,7 @@ export function assumeRole(
         description: description,
         policy: documents.iam.assumeRole(args.roles),
       },
-      opts
+      opts,
     );
   }
 }
@@ -59,7 +59,7 @@ export type EnforceMFAArgs = documents.iam.EnforceMFAArgs;
 // This policy is from https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage.html.
 export function enforceMFA(
   args: EnforceMFAArgs,
-  opts?: pulumi.CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions,
 ): aws.iam.Policy {
   return new aws.iam.Policy(
     "EnforceMFA",
@@ -68,12 +68,12 @@ export function enforceMFA(
         "Allows users to manage their own passwords and MFA devices but nothing else unless they authenticate with MFA.",
       policy: documents.iam.enforceMFA(args),
     },
-    opts
+    opts,
   );
 }
 
 export function fullAccess(
-  opts?: pulumi.CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions,
 ): aws.iam.Policy {
   return new aws.iam.Policy(
     "IAMFullAccess",
@@ -81,6 +81,6 @@ export function fullAccess(
       description: "Allows full access to IAM.",
       policy: documents.iam.fullAccess(),
     },
-    opts
+    opts,
   );
 }

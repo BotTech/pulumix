@@ -3,22 +3,26 @@ import * as statements from "./statements";
 import { AccessPatternArgs, allowResourceActions } from "./statements";
 import { Input } from "@pulumi/pulumi";
 import * as pulumi from "@pulumi/pulumi";
+import { arn, ARN } from "~/src";
 
 type BucketArgs = {
-  bucket: Input<string>;
+  /**
+   * Use pulumixAWS.resources.s3.bucket
+   */
+  bucketArn: ARN;
 };
 
 type BucketPrefixArgs = {
-  bucketPrefix: Input<string>;
+  bucketArnPrefix: Input<string>;
 };
 
 export type CreateBucketArgs = (BucketArgs | BucketPrefixArgs) &
   AccessPatternArgs;
 
-export function bucketName(args: CreateBucketArgs): Input<string> {
-  return "bucket" in args
-    ? args.bucket
-    : pulumi.interpolate`${args.bucketPrefix}*`;
+export function bucketResource(args: CreateBucketArgs): Input<string> {
+  return "bucketArn" in args
+    ? arn(args.bucketArn)
+    : pulumi.interpolate`${args.bucketArnPrefix}*`;
 }
 
 class S3AccessPatterns extends statements.AccessPatterns {
@@ -30,7 +34,7 @@ class S3AccessPatterns extends statements.AccessPatterns {
     return allowResourceActions({
       Sid: "CreateBucketAccess",
       Action: ["s3:CreateBucket", "s3:PutBucketTagging"],
-      Resource: bucketName(args),
+      Resource: bucketResource(args),
       mfaPresent: args.mfaPresent,
     });
   }

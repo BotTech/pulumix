@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
-import { arns, ARNs } from "~/src/index";
+import { arns, ARNs } from "~/src";
 import * as conditions from "./conditions";
-import * as resources from "./resources";
+import * as resources from "../../../../resources";
 import * as statements from "./statements";
 
 // These are from https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage.html.
@@ -32,7 +32,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
   }
 
   allowManageOwnPasswords(
-    allowChangePasswordViaConsole?: boolean
+    allowChangePasswordViaConsole?: boolean,
   ): aws.iam.PolicyStatement {
     const allowManageOwnPasswordsActions = [
       "iam:ChangePassword",
@@ -43,7 +43,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:CreateLoginProfile",
         "iam:DeleteLoginProfile",
         "iam:GetLoginProfile",
-        "iam:UpdateLoginProfile"
+        "iam:UpdateLoginProfile",
       );
     }
     return statements.allowResourceActions({
@@ -136,7 +136,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
   }
 
   denyAllExceptManageOwnWithoutMFA(
-    allowListUsers?: boolean
+    allowListUsers?: boolean,
   ): aws.iam.PolicyStatement {
     const denyAllExceptListedWithoutMFAActions = [
       "iam:CreateVirtualMFADevice",

@@ -3,9 +3,6 @@ import {
   getProject,
   getStack,
   Input,
-  Output,
-  output,
-  all,
   Resource,
 } from "@pulumi/pulumi";
 import {
@@ -13,31 +10,7 @@ import {
   resourceName,
   ResourceNameProperty,
 } from "@bottech/pulumix";
-
-export interface ARNProperty {
-  arn: Input<string>;
-}
-
-export type AWSNamedResource = ARNProperty & Resource;
-
-// TODO: Make more things accept an input.
-export type ARN = Input<string | ARNProperty>;
-
-export function arn(arn: ARN): Output<string> {
-  return inputPropertyOrElse<string, ARNProperty, "arn">(arn, "arn");
-}
-
-export type ARNs = Input<ARN | ARN[]>;
-
-export function arns(arns: ARNs): Output<string[]> {
-  return output(arns).apply((arns) => {
-    if (Array.isArray(arns)) {
-      return all(arns.map(arn));
-    } else {
-      return arn(arns).apply((arn) => [arn]);
-    }
-  });
-}
+import {arn, ARNProperty, AWSNamedResource} from "~/src";
 
 export type AWSResourceNames = AWSResourceNameProperties | AWSNamedResource;
 

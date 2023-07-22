@@ -36,20 +36,20 @@ export class ManagementAccount extends pulumi.ComponentResource {
 
   constructor(
     args: ManagementAccountArgs,
-    opts?: pulumi.CustomResourceOptions
+    opts?: pulumi.CustomResourceOptions,
   ) {
     super(
       "pulumix-aws:organizations:ManagementAccount",
       args.organizationName,
       {},
-      opts
+      opts,
     );
 
     const childOpts = { ...opts, parent: this, protect: true };
 
     const passwordPolicy = iam.strongAccountPasswordPolicy(
       args.minimumPasswordLength,
-      childOpts
+      childOpts,
     );
 
     // Policies.
@@ -62,7 +62,7 @@ export class ManagementAccount extends pulumi.ComponentResource {
         allowListUsers: true,
         allowChangePasswordViaConsole: true,
       },
-      childOpts
+      childOpts,
     );
 
     // Groups.
@@ -70,23 +70,23 @@ export class ManagementAccount extends pulumi.ComponentResource {
     this.everyoneGroup = new aws.iam.Group(
       "Everyone",
       { name: "Everyone" },
-      childOpts
+      childOpts,
     );
 
     iam.attachGroupPolicies(
       { group: this.everyoneGroup, policies: [enforceMFAPolicy] },
-      childOpts
+      childOpts,
     );
 
     this.administratorsGroup = new aws.iam.Group(
       "Administrators",
       { name: "Administrators" },
-      childOpts
+      childOpts,
     );
 
     iam.attachGroupPolicies(
       { group: this.administratorsGroup, policies: adminPolicies },
-      childOpts
+      childOpts,
     );
 
     // Users.
@@ -99,10 +99,10 @@ export class ManagementAccount extends pulumi.ComponentResource {
           allUsersGroupName: this.everyoneGroup.name,
           groupNames: [this.administratorsGroup.name],
           passwordLength: passwordPolicy.minimumPasswordLength.apply(
-            (length) => length ?? iam.DefaultPasswordLength
+            (length) => length ?? iam.DefaultPasswordLength,
           ),
         },
-        childOpts
+        childOpts,
       );
     });
 
@@ -121,7 +121,7 @@ export class ManagementAccount extends pulumi.ComponentResource {
         ],
         featureSet: "ALL",
       },
-      childOpts
+      childOpts,
     );
     this.accountId = organization.masterAccountId;
 
@@ -135,13 +135,13 @@ export class ManagementAccount extends pulumi.ComponentResource {
         resourceName: "",
       },
       args.organizationalUnits,
-      childOpts
+      childOpts,
     );
 
     const assumeOrgAccountAccessRoles =
       assumeOrganizationAccountAccessRolePolicies(
         organizationalUnits,
-        childOpts
+        childOpts,
       );
 
     iam.attachGroupPolicies(
@@ -149,7 +149,7 @@ export class ManagementAccount extends pulumi.ComponentResource {
         group: this.administratorsGroup,
         policies: assumeOrgAccountAccessRoles,
       },
-      childOpts
+      childOpts,
     );
 
     // KMS Key.
@@ -160,15 +160,16 @@ export class ManagementAccount extends pulumi.ComponentResource {
           "Pulumi",
           {
             description: "Pulumi secrets key.",
+            // TODO: Why do we use staticCallerAccountId? Should this even exist?
             policy: staticCallerAccountId().then((accountId) => {
               return JSON.stringify(
                 iam.policies.documents.kms.inline.keyAccess({
                   accountId: accountId,
-                })
+                }),
               );
             }),
           },
-          { ...childOpts, import: arn }
+          { ...childOpts, import: arn },
         );
 
         new aws.kms.Alias(
@@ -177,7 +178,7 @@ export class ManagementAccount extends pulumi.ComponentResource {
             targetKeyId: key.id,
             name: "Pulumi",
           },
-          childOpts
+          childOpts,
         );
       }
     });
@@ -191,7 +192,7 @@ export interface ProdNonProdSubOrganizationalUnitsArgs {
 
 export function prodNonProdOrganizationalUnit(
   name: string,
-  subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs
+  subOrganizationalUnits: ProdNonProdSubOrganizationalUnitsArgs,
 ): Record<string, OrganizationalUnitArg> {
   return {
     [name]: {
@@ -203,7 +204,7 @@ export function prodNonProdOrganizationalUnit(
 }
 
 export function securityOrganizationalUnit(
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): Record<string, OrganizationalUnitArg> {
   return prodNonProdOrganizationalUnit("Security", {
     Prod: {
@@ -217,7 +218,7 @@ export function securityOrganizationalUnit(
 
 export function workloadSubOrganizationalUnit(
   workload: string,
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): ProdNonProdSubOrganizationalUnitsArgs {
   const nonProdName = `${workload}Test`;
   const prodName = `${workload}Prod`;
@@ -237,7 +238,7 @@ export function workloadSubOrganizationalUnit(
 
 function mergeProdNonProdSubOrganizationalUnitsArgs(
   a: ProdNonProdSubOrganizationalUnitsArgs,
-  b: ProdNonProdSubOrganizationalUnitsArgs
+  b: ProdNonProdSubOrganizationalUnitsArgs,
 ): ProdNonProdSubOrganizationalUnitsArgs {
   const merge = (key: keyof ProdNonProdSubOrganizationalUnitsArgs) =>
     a[key] || b[key] ? { [key]: { ...a[key], ...b[key] } } : {};
@@ -246,7 +247,7 @@ function mergeProdNonProdSubOrganizationalUnitsArgs(
 
 export function workloadsOrganizationalUnit(
   workloads: string[] = [],
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): Record<string, OrganizationalUnitArg> {
   return prodNonProdOrganizationalUnit(
     "Workloads",
@@ -254,13 +255,13 @@ export function workloadsOrganizationalUnit(
       .map((workload) => {
         return workloadSubOrganizationalUnit(workload, email);
       })
-      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {})
+      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {}),
   );
 }
 
 export function deploymentSubOrganizationalUnit(
   workload: string,
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): ProdNonProdSubOrganizationalUnitsArgs {
   const prodName = `${workload}Prod`;
   return {
@@ -274,7 +275,7 @@ export function deploymentSubOrganizationalUnit(
 
 export function deploymentsOrganizationalUnit(
   workloads: string[] = [],
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): Record<string, OrganizationalUnitArg> {
   return prodNonProdOrganizationalUnit(
     "Deployments",
@@ -282,13 +283,13 @@ export function deploymentsOrganizationalUnit(
       .map((workload) => {
         return deploymentSubOrganizationalUnit(workload, email);
       })
-      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {})
+      .reduce(mergeProdNonProdSubOrganizationalUnitsArgs, {}),
   );
 }
 
 export function recommendedOrganizationalUnits(
   workloads: string[] = [],
-  email: (accountName: string, prod: boolean) => string
+  email: (accountName: string, prod: boolean) => string,
 ): Record<string, OrganizationalUnitArg> {
   return {
     ...securityOrganizationalUnit(email),
@@ -300,7 +301,7 @@ export function recommendedOrganizationalUnits(
 function organizationalUnitAccounts(
   parent: AWSIdentifiedResourceNames,
   accounts?: Record<string, aws.organizations.AccountArgs>,
-  opts?: pulumi.CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions,
 ): Record<string, aws.organizations.Account> {
   if (accounts === undefined) {
     return {};
@@ -312,7 +313,7 @@ function organizationalUnitAccounts(
         ...account,
         parentId: id(parent),
       }),
-      opts
+      opts,
     );
   });
 }
@@ -326,7 +327,7 @@ interface OrganizationalUnitResult {
 function organizationalUnitHierarchy(
   parent: AWSIdentifiedResourceNames,
   organizationalUnits?: Record<string, OrganizationalUnitArg>,
-  opts?: pulumi.CustomResourceOptions
+  opts?: pulumi.CustomResourceOptions,
 ): Record<string, OrganizationalUnitResult> {
   if (organizationalUnits === undefined) {
     return {};
@@ -338,19 +339,19 @@ function organizationalUnitHierarchy(
         name: name,
         parentId: id(parent),
       },
-      opts
+      opts,
     );
     return {
       accounts: organizationalUnitAccounts(
         organizationalUnit,
         unit.accounts,
-        opts
+        opts,
       ),
       organizationalUnit: organizationalUnit,
       subOrganizationalUnits: organizationalUnitHierarchy(
         organizationalUnit,
         unit.subOrganizationlUnits,
-        opts
+        opts,
       ),
     };
   });
@@ -358,7 +359,7 @@ function organizationalUnitHierarchy(
 
 function assumeOrganizationAccountAccessRolePolicies(
   organizationalUnits: Record<string, OrganizationalUnitResult>,
-  opts: pulumi.ComponentResourceOptions
+  opts: pulumi.ComponentResourceOptions,
 ): aws.iam.Policy[] {
   let results = [] as aws.iam.Policy[];
   for (const name in organizationalUnits) {
@@ -369,16 +370,16 @@ function assumeOrganizationAccountAccessRolePolicies(
           mapValues(unit.accounts, (account) => {
             return iam.policies.organizations.assumeOrganizationAccountAccessRole(
               account,
-              opts
+              opts,
             );
-          })
-        )
+          }),
+        ),
       );
       results = results.concat(
         assumeOrganizationAccountAccessRolePolicies(
           unit.subOrganizationalUnits,
-          opts
-        )
+          opts,
+        ),
       );
     }
   }
