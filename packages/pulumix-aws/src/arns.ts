@@ -89,3 +89,29 @@ function interpolateResource(
   }, resourceId);
   return pulumi.interpolate`${resourceType}${separator}${id}`;
 }
+
+export type ARNParts = {
+  partition: Output<string>;
+  service: Output<string>;
+  region: Output<string>;
+  accountId: Output<string>;
+  resource: Output<string>;
+};
+
+export function extractARNParts(arnWithAccountId: ARN): Output<ARNParts> {
+  return arn(arnWithAccountId).apply((arn) => {
+    const parts = arn.split(":", 6).map((s) => output<string>(s));
+    const empty = output("");
+    return {
+      partition: parts[1] ?? empty,
+      service: parts[2] ?? empty,
+      region: parts[3] ?? empty,
+      accountId: parts[4] ?? empty,
+      resource: parts[5] ?? empty,
+    };
+  });
+}
+
+export function extractARNAccountId(arnWithAccountId: ARN): Output<string> {
+  return extractARNParts(arnWithAccountId).apply((parts) => parts.accountId);
+}

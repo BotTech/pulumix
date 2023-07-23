@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Input } from "@pulumi/pulumi";
-import { arns, ARNs, tags } from "~/src";
+import { Input, output, Output } from "@pulumi/pulumi";
+import { arns, ARNs, extractARNAccountId, tags } from "~/src";
 import * as policies from "./policies";
 
 export interface UserRoleArgs {
@@ -17,11 +17,15 @@ export class UserRole extends pulumi.ComponentResource {
   constructor(
     name: string,
     args: UserRoleArgs,
-    opts?: pulumi.CustomResourceOptions
+    opts?: pulumi.CustomResourceOptions,
   ) {
     super("pulumix-aws:iam:UserRole", name, {}, opts);
 
     const childOpts = { ...opts, parent: this };
+
+    const accountIds: Output<string[]> = arns(args.groupArns).apply((arns) => {
+      return output(arns.map(extractARNAccountId));
+    });
 
     this.role = new aws.iam.Role(
       name,
@@ -29,17 +33,19 @@ export class UserRole extends pulumi.ComponentResource {
         description: args.description,
         path: "/user/",
         name: name,
-        assumeRolePolicy: policies.documents.iam.inline.groupAssumeRole(
-          args.groupArns
-        ),
+        // TODO: Ensure that this only makes it possible for someone in the account to assume the role if they also have
+        //  a policy that allows them to rather than this on its own permitting anyone in the account to assume the
+        //  role.
+        assumeRolePolicy:
+          policies.documents.iam.inline.accountAssumeRole(accountIds),
         tags: tags(),
       },
-      childOpts
+      childOpts,
     );
 
     this.assumeRolePolicy = policies.iam.assumeRole(
       { role: this.role },
-      childOpts
+      childOpts,
     );
 
     // TODO: Check names.
@@ -54,13 +60,13 @@ export class UserRole extends pulumi.ComponentResource {
                 role: this.role.name,
                 policyArn: arn,
               },
-              childOpts
-            )
-        )
+              childOpts,
+            ),
+        ),
       );
     }
 
-    // I'm pretty sure this doesn't work. The group must be in the assumeRolePolicy policy on the role.
+    // TODO: We need this.
     // if (args.groupNames !== undefined) {
     //   output(args.groupNames).apply((groupNames) =>
     //     groupNames.map(

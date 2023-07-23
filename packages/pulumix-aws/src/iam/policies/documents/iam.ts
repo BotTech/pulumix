@@ -2,7 +2,7 @@ import * as aws from "@pulumi/aws";
 import { Input } from "@pulumi/pulumi";
 import { ARNs } from "~/src";
 import * as statements from "./statements";
-import { awsPrincipals, rootUser } from "./statements/principals";
+import { account, awsPrincipals } from "./statements/principals";
 
 export function assumeRole(roleArns: ARNs): aws.iam.PolicyDocument {
   return {
@@ -31,7 +31,7 @@ export function enforceMFA(args: EnforceMFAArgs): aws.iam.PolicyDocument {
     Statement: [
       statements.iam.allowViewAccountInfo(args.allowListUsers),
       statements.iam.allowManageOwnPasswords(
-        args.allowListUsers && args.allowChangePasswordViaConsole
+        args.allowListUsers && args.allowChangePasswordViaConsole,
       ),
       statements.iam.allowManageOwnAccessKeys(),
       statements.iam.allowManageOwnSigningCertificates(),
@@ -45,7 +45,7 @@ export function enforceMFA(args: EnforceMFAArgs): aws.iam.PolicyDocument {
 }
 
 export function fullAccess(
-  args?: statements.AccessPatternArgs
+  args?: statements.AccessPatternArgs,
 ): aws.iam.PolicyDocument {
   return {
     Version: "2012-10-17",
@@ -66,22 +66,27 @@ function serviceAssumeRole(service: Input<string>): aws.iam.PolicyDocument {
   };
 }
 
-function accountAssumeRole(accountId: Input<string>): aws.iam.PolicyDocument {
+function accountAssumeRole(
+  accountId: Input<string> | Input<Input<string>[]>,
+): aws.iam.PolicyDocument {
   return {
     Version: "2012-10-17",
-    Statement: [statements.iam.inline.assumeRole(rootUser(accountId))],
+    Statement: [statements.iam.inline.assumeRole(account(accountId))],
   };
 }
 
-function groupAssumeRole(groupArns: ARNs): aws.iam.PolicyDocument {
+/**
+ * The principal may be anything in this list: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
+ */
+function principalAssumeRole(principalArns: ARNs): aws.iam.PolicyDocument {
   return {
     Version: "2012-10-17",
-    Statement: [statements.iam.inline.assumeRole(awsPrincipals(groupArns))],
+    Statement: [statements.iam.inline.assumeRole(awsPrincipals(principalArns))],
   };
 }
 
 export const inline = {
   serviceAssumeRole,
   accountAssumeRole,
-  groupAssumeRole,
+  principalAssumeRole,
 };

@@ -168,6 +168,9 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
 }
 
 export class IAMInlineAccessPatterns extends statements.InlineAccessPatterns {
+  /**
+   * The principal may be anything in this list: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
+   */
   assumeRole(principal: statements.Principal): aws.iam.PolicyStatement {
     return statements.inlineAllowActions({
       Action: "sts:AssumeRole",
