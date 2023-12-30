@@ -22,7 +22,7 @@
     "check": "npm run check --workspaces",
     "clean": "npm run clean --workspaces",
     "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue --fix",
-    "link": "npm link --workspaces",
+    "link": "npm link --workspaces && rm -rf node_modules/@pulumi",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue",
     "test": "npm run test --workspaces",
     "upgrade": "npm-check-updates --upgrade --workspaces --root && npm update"

@@ -1,46 +1,26 @@
-import { Input, output, Output, Resource } from "@pulumi/pulumi";
-import { hasKey, Key } from "./record";
-import { extractUnwrapped, wrappedOutput } from "./unwrap";
+import { Input, Resource } from "@pulumi/pulumi";
+import { isKey } from "./record";
 
-export function propertyOrElse<A, B, C extends { [P in K]: B }, K extends Key>(
-  alternatives: A | C,
-  key: K
-): A | B {
-  return hasKey(alternatives, key) ? alternatives[key] : alternatives;
+export type PropertyOrSelf<
+  Value,
+  Key extends PropertyKey,
+> = Key extends keyof Value ? Value[Key] : Value;
+
+/**
+ * If the `value` has a property with the given `key` then return the value of that property otherwise return the
+ * `value`.
+ */
+export function propertyOrSelf<Value, Key extends PropertyKey>(
+  value: Value,
+  key: Key,
+): Value extends unknown ? PropertyOrSelf<Value, Key> : never {
+  if (isKey(value, key)) {
+    return value[key];
+  } else {
+    // No idea how to get rid of this cast.
+    return value as Value extends unknown ? PropertyOrSelf<Value, Key> : never;
+  }
 }
-
-// TODO: Are all these types for alternatives necessary?
-export function inputPropertyOrElse<
-  A,
-  B extends { [P in K]: Input<A> },
-  K extends Key
->(alternatives: Input<A> | B | Input<A | B>, key: K): Output<A> {
-  return output(alternatives).apply<A>((unwrapped) => {
-    // I don't know why the type inference fails so badly here.
-    const extracted = extractUnwrapped<A | B>(unwrapped);
-    const propOrA = propertyOrElse<A, Input<A>, B, K>(extracted, key);
-    return wrappedOutput(propOrA);
-  });
-}
-
-// export function inputOrProperties<
-//   A,
-//   B extends { [P in K]:   Input<A> },
-//   K extends Key
-// >(
-//   alternatives:   Input<(  Input<A> |   Input<B>)[]>,
-//   key: K
-// ):   Input<  Input<A>[]> {
-//   return pulumi
-//     .output(alternatives)
-//     .apply((unwrapped:   Unwrap<  Input<A | B>[]>) => {
-//       // The types get a bit lost in Unwrap.
-//       // See https://stackoverflow.com/questions/67146967/why-does-typescript-infer-unknown-with-a-recursive-type.
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       const aOrBs: (  Input<A> |   Input<B>)[] = unwrapped as any;
-//       return aOrBs.map((aOrB) => inputPropertyOrElse<A, B, K>(aOrB, key));
-//     });
-// }
 
 export interface ResourceNameProperty {
   resourceName: string;
@@ -64,16 +44,16 @@ export function resourceName(resourceName: ResourceName): string {
   }
 }
 
-export interface NameProperty {
+export type NameProperty = {
   name: Input<string>;
-}
+};
 
 export type NamedResource = NameProperty & Resource;
 
 export type Name = NameProperty | Input<string>;
 
 export function nameProperty(name: Name): Input<string> {
-  return inputPropertyOrElse(name, "name");
+  return propertyOrSelf(name, "name");
 }
 
 export type ResourceNames = string | ResourceNameProperties | NamedResource;
@@ -81,7 +61,7 @@ export type ResourceNames = string | ResourceNameProperties | NamedResource;
 export type ResourceNameProperties = ResourceNameProperty & NameProperty;
 
 export function resourceNames(
-  resourceNames: ResourceNames
+  resourceNames: ResourceNames,
 ): ResourceNameProperties {
   return {
     resourceName: resourceName(resourceNames),

@@ -1,7 +1,7 @@
 import { mapValues, resourceName } from "@bottech/pulumix";
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { staticCallerAccountId } from "../caller";
+import { staticCallerAccountId } from "~/src";
 import { AWSIdentifiedResourceNames, iam, id, kms, tagged } from "../index";
 
 export interface AdministratorUserImportArgs {

@@ -1,12 +1,16 @@
 // https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsidentityandaccessmanagementiam.html#awsidentityandaccessmanagementiam-resources-for-iam-policies
 
-import { Input } from "@pulumi/pulumi";
+import { Input, Output } from "@pulumi/pulumi";
+import { ARN } from "~/src";
 
 import {
+  ARNPartsNoRegion,
   ARNServiceArgsNoRegion,
+  extractARNPartsWithResourceType,
+  extractARNPartsWithSubResourceTypes,
   interpolateARN,
   interpolateResourceType,
-} from "~/src";
+} from "~/src/arns";
 
 // TODO: This should ideally be a function that takes a partition.
 export const ownMFA = "arn:aws:iam::*:mfa/${aws:username}";
@@ -19,6 +23,12 @@ export function accessReport(
 ) {
   const resource = interpolateResourceType("access-report", args.entityPath);
   return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractAccessReport(
+  arn: ARN,
+): Output<ARNPartsNoRegion & { entityPath: string }> {
+  return extractARNPartsWithResourceType(arn, "access-report", "entityPath");
 }
 
 export function assumedRole(
@@ -35,6 +45,23 @@ export function assumedRole(
   return interpolateARN({ ...args, service: "iam", resource });
 }
 
+export function extractAssumedRole(arn: ARN): Output<
+  ARNPartsNoRegion & {
+    roleName: string;
+    roleSessionName: string;
+  }
+> {
+  return extractARNPartsWithSubResourceTypes(arn, "assumed-role", "role").apply(
+    (parts) => {
+      return {
+        ...parts,
+        roleName: parts.role[0] ?? "",
+        roleSessionName: parts.role[1] ?? "",
+      };
+    },
+  );
+}
+
 export function federatedUser(
   args: ARNServiceArgsNoRegion & { userName: Input<string> },
 ) {
@@ -42,11 +69,23 @@ export function federatedUser(
   return interpolateARN({ ...args, service: "iam", resource });
 }
 
+export function extractFederatedUser(
+  arn: ARN,
+): Output<ARNPartsNoRegion & { userName: string }> {
+  return extractARNPartsWithResourceType(arn, "federated-user", "userName");
+}
+
 export function group(
   args: ARNServiceArgsNoRegion & { groupNameWithPath: Input<string> },
 ) {
   const resource = interpolateResourceType("group", args.groupNameWithPath);
   return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractGroup(
+  arn: ARN,
+): Output<ARNPartsNoRegion & { groupNameWithPath: string }> {
+  return extractARNPartsWithResourceType(arn, "group", "groupNameWithPath");
 }
 
 export function instanceProfile(
