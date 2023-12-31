@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
 import { Input } from "@pulumi/pulumi";
-import { ARNs } from "~/src";
 import * as statements from "./statements";
 import { account, awsPrincipals } from "./statements/principals";
+import { ARNs } from "~/src/arns";
 
 export function assumeRole(roleArns: ARNs): aws.iam.PolicyDocument {
   return {

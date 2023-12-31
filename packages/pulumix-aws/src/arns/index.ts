@@ -1,6 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import { all, Input, output, Output, Resource } from "@pulumi/pulumi";
-import { kv, propertyOrSelf } from "@bottech/pulumix";
+import { Inputs, kv, propertyOrSelf } from "@bottech/pulumix";
 
 import * as iam from "./iam";
 import * as s3 from "./s3";
@@ -22,10 +22,10 @@ export function arn(arn: ARN): Output<string> {
   return output(arn).apply((x) => propertyOrSelf(x, "arn"));
 }
 
-// TODO: Why is this called Index?
-export type Index = Input<ARN | ARN[]>;
+export type ARNs = Input<ARN | ARN[]>;
 
-export function arns(arns: Index): Output<string[]> {
+// TODO: Rename this. arns.arns is awkward.
+export function arns(arns: ARNs): Output<string[]> {
   return output(arns).apply((arns) => {
     if (Array.isArray(arns)) {
       return all(arns.map(arn));
@@ -35,36 +35,25 @@ export function arns(arns: Index): Output<string[]> {
   });
 }
 
-export type ARNServiceArgs = {
-  partition?: Input<string>;
-  region: Input<string>;
-  accountId: Input<string>;
+export type ARNParts = {
+  partition: string;
+  service: string;
+  region: string;
+  accountId: string;
+  resource: string;
 };
 
-export type ARNServiceArgsNoRegion = Omit<ARNServiceArgs, "region">;
+export type WithPart<A, Part extends string> = A & { [P in Part]: string };
 
-export type ARNServiceArgsNoAccountId = Omit<ARNServiceArgs, "accountId">;
+export type ARNArgs = Inputs<{
+  partition?: string;
+  service: string;
+  region?: string;
+  accountId?: string;
+  resource: string;
+}>;
 
-export type ARNServiceArgsNoRegionOrAccountId = Omit<
-  ARNServiceArgsNoRegion,
-  "accountId"
->;
-
-export type ARNArgs = ARNServiceArgs & {
-  service: Input<string>;
-  resource: Input<string>;
-};
-
-export type ARNArgsNoRegion = Omit<ARNArgs, "region">;
-
-export type ARNArgsNoAccountId = Omit<ARNArgs, "accountId">;
-
-export type ARNArgsNoRegionOrAccountId = Omit<ARNArgsNoRegion, "accountId">;
-
-export type ARNOptionalArgs = ARNArgsNoRegionOrAccountId &
-  Partial<Pick<ARNArgs, "region" | "accountId">>;
-
-export function interpolateARN(args: ARNOptionalArgs): Output<string> {
+export function interpolateARN(args: ARNArgs): Output<string> {
   return pulumi.interpolate`arn:${args.partition ?? "aws"}:${args.service}:${
     args.region ?? ""
   }:${args.accountId ?? ""}:${args.resource}`;
@@ -90,6 +79,22 @@ export function interpolateResourceType(
   return interpolateResource("/", resourceType, resourceId, ...subResourceIds);
 }
 
+export function interpolateARNWithResourceType(
+  args: Omit<ARNArgs, "resource">,
+  resourceType: Input<string>,
+  resourceId: Input<string>,
+  ...subResourceIds: Input<string>[]
+): Output<string> {
+  return interpolateARN({
+    ...args,
+    resource: interpolateResourceType(
+      resourceType,
+      resourceId,
+      ...subResourceIds,
+    ),
+  });
+}
+
 export function interpolateQualifiedResource(
   resourceType: Input<string>,
   resourceId: Input<string>,
@@ -98,15 +103,21 @@ export function interpolateQualifiedResource(
   return interpolateResource(":", resourceType, resourceId, ...subResourceIds);
 }
 
-export type ARNParts = {
-  partition: string;
-  service: string;
-  region: string;
-  accountId: string;
-  resource: string;
-};
-
-export type ARNPartsNoRegion = Omit<ARNParts, "region">;
+export function interpolateARNWithQualifiedResource(
+  args: Omit<ARNArgs, "resource">,
+  resourceType: Input<string>,
+  resourceId: Input<string>,
+  ...subResourceIds: Input<string>[]
+): Output<string> {
+  return interpolateARN({
+    ...args,
+    resource: interpolateQualifiedResource(
+      resourceType,
+      resourceId,
+      ...subResourceIds,
+    ),
+  });
+}
 
 export function extractARNParts(arnWithAccountId: ARN): Output<ARNParts> {
   return arn(arnWithAccountId).apply((arn) => {

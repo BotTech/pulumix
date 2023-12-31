@@ -1,16 +1,28 @@
 // https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsidentityandaccessmanagementiam.html#awsidentityandaccessmanagementiam-resources-for-iam-policies
 
-import { Input, Output } from "@pulumi/pulumi";
+import { Output } from "@pulumi/pulumi";
 import { ARN } from "~/src";
 
 import {
-  ARNPartsNoRegion,
-  ARNServiceArgsNoRegion,
   extractARNPartsWithResourceType,
   extractARNPartsWithSubResourceTypes,
   interpolateARN,
+  interpolateARNWithResourceType,
   interpolateResourceType,
+  WithPart,
 } from "~/src/arns";
+import { Inputs } from "@bottech/pulumix";
+
+type Parts = {
+  partition: string;
+  accountId: string;
+};
+
+type SubResourceParts<Part extends string> = WithPart<Parts, Part>;
+
+type SubResourceArgs<Part extends string> = Inputs<SubResourceParts<Part>>;
+
+const service = "iam";
 
 // TODO: This should ideally be a function that takes a partition.
 export const ownMFA = "arn:aws:iam::*:mfa/${aws:username}";
@@ -19,38 +31,35 @@ export const ownMFA = "arn:aws:iam::*:mfa/${aws:username}";
 export const ownUser = "arn:aws:iam::*:user/${aws:username}";
 
 export function accessReport(
-  args: ARNServiceArgsNoRegion & { entityPath: Input<string> },
-) {
-  const resource = interpolateResourceType("access-report", args.entityPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"entityPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "access-report",
+    args.entityPath,
+  );
 }
 
 export function extractAccessReport(
   arn: ARN,
-): Output<ARNPartsNoRegion & { entityPath: string }> {
+): Output<SubResourceParts<"entityPath">> {
   return extractARNPartsWithResourceType(arn, "access-report", "entityPath");
 }
 
 export function assumedRole(
-  args: ARNServiceArgsNoRegion & {
-    roleName: Input<string>;
-    roleSessionName: Input<string>;
-  },
-) {
+  args: SubResourceArgs<"roleName" | "roleSessionName">,
+): Output<string> {
   const resource = interpolateResourceType(
     "assumed-role",
     args.roleName,
     args.roleSessionName,
   );
-  return interpolateARN({ ...args, service: "iam", resource });
+  return interpolateARN({ ...args, service, resource });
 }
 
-export function extractAssumedRole(arn: ARN): Output<
-  ARNPartsNoRegion & {
-    roleName: string;
-    roleSessionName: string;
-  }
-> {
+export function extractAssumedRole(
+  arn: ARN,
+): Output<SubResourceParts<"roleName" | "roleSessionName">> {
   return extractARNPartsWithSubResourceTypes(arn, "assumed-role", "role").apply(
     (parts) => {
       return {
@@ -63,102 +72,193 @@ export function extractAssumedRole(arn: ARN): Output<
 }
 
 export function federatedUser(
-  args: ARNServiceArgsNoRegion & { userName: Input<string> },
-) {
-  const resource = interpolateResourceType("federated-user", args.userName);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"userName">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "federated-user",
+    args.userName,
+  );
 }
 
 export function extractFederatedUser(
   arn: ARN,
-): Output<ARNPartsNoRegion & { userName: string }> {
+): Output<SubResourceParts<"userName">> {
   return extractARNPartsWithResourceType(arn, "federated-user", "userName");
 }
 
 export function group(
-  args: ARNServiceArgsNoRegion & { groupNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("group", args.groupNameWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"groupNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "group",
+    args.groupNameWithPath,
+  );
 }
 
 export function extractGroup(
   arn: ARN,
-): Output<ARNPartsNoRegion & { groupNameWithPath: string }> {
+): Output<SubResourceParts<"groupNameWithPath">> {
   return extractARNPartsWithResourceType(arn, "group", "groupNameWithPath");
 }
 
 export function instanceProfile(
-  args: ARNServiceArgsNoRegion & { instanceProfileNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType(
+  args: SubResourceArgs<"instanceProfileNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
     "instance-profile",
     args.instanceProfileNameWithPath,
   );
-  return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractInstanceProfile(
+  arn: ARN,
+): Output<SubResourceParts<"instanceProfileNameWithPath">> {
+  return extractARNPartsWithResourceType(
+    arn,
+    "instance-profile",
+    "instanceProfileNameWithPath",
+  );
 }
 
 export function mfa(
-  args: ARNServiceArgsNoRegion & { mfaTokenIdWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("mfa", args.mfaTokenIdWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"mfaTokenIdWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "mfa",
+    args.mfaTokenIdWithPath,
+  );
+}
+
+export function extractMfa(
+  arn: ARN,
+): Output<SubResourceParts<"mfaTokenIdWithPath">> {
+  return extractARNPartsWithResourceType(arn, "mfa", "mfaTokenIdWithPath");
 }
 
 export function oidcProvider(
-  args: ARNServiceArgsNoRegion & { oidcProviderName: Input<string> },
-) {
-  const resource = interpolateResourceType(
+  args: SubResourceArgs<"oidcProviderName">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
     "oidc-provider",
     args.oidcProviderName,
   );
-  return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractOidcProvider(
+  arn: ARN,
+): Output<SubResourceParts<"oidcProviderName">> {
+  return extractARNPartsWithResourceType(
+    arn,
+    "oidc-provider",
+    "oidcProviderName",
+  );
 }
 
 export function policy(
-  args: ARNServiceArgsNoRegion & { policyNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("policy", args.policyNameWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"policyNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "policy",
+    args.policyNameWithPath,
+  );
+}
+
+export function extractPolicy(
+  arn: ARN,
+): Output<SubResourceParts<"policyNameWithPath">> {
+  return extractARNPartsWithResourceType(arn, "policy", "policyNameWithPath");
 }
 
 export function role(
-  args: ARNServiceArgsNoRegion & { roleNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("role", args.roleNameWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"roleNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "role",
+    args.roleNameWithPath,
+  );
+}
+
+export function extractRole(
+  arn: ARN,
+): Output<SubResourceParts<"roleNameWithPath">> {
+  return extractARNPartsWithResourceType(arn, "role", "roleNameWithPath");
 }
 
 export function samlProvider(
-  args: ARNServiceArgsNoRegion & { samlProviderName: Input<string> },
-) {
-  const resource = interpolateResourceType(
+  args: SubResourceArgs<"samlProviderName">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
     "saml-provider",
     args.samlProviderName,
   );
-  return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractSamlProvider(
+  arn: ARN,
+): Output<SubResourceParts<"samlProviderName">> {
+  return extractARNPartsWithResourceType(
+    arn,
+    "saml-provider",
+    "samlProviderName",
+  );
 }
 
 export function serverCertificate(
-  args: ARNServiceArgsNoRegion & { certificateNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType(
+  args: SubResourceArgs<"certificateNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
     "service-certificate",
     args.certificateNameWithPath,
   );
-  return interpolateARN({ ...args, service: "iam", resource });
+}
+
+export function extractServerCertificate(
+  arn: ARN,
+): Output<SubResourceParts<"certificateNameWithPath">> {
+  return extractARNPartsWithResourceType(
+    arn,
+    "service-certificate",
+    "certificateNameWithPath",
+  );
 }
 
 export function smsMfa(
-  args: ARNServiceArgsNoRegion & { mfaTokenIdWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("sms-mfa", args.mfaTokenIdWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"mfaTokenIdWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "sms-mfa",
+    args.mfaTokenIdWithPath,
+  );
+}
+
+export function extractSmsMfa(
+  arn: ARN,
+): Output<SubResourceParts<"mfaTokenIdWithPath">> {
+  return extractARNPartsWithResourceType(arn, "sms-mfa", "mfaTokenIdWithPath");
 }
 
 export function user(
-  args: ARNServiceArgsNoRegion & { userNameWithPath: Input<string> },
-) {
-  const resource = interpolateResourceType("user", args.userNameWithPath);
-  return interpolateARN({ ...args, service: "iam", resource });
+  args: SubResourceArgs<"userNameWithPath">,
+): Output<string> {
+  return interpolateARNWithResourceType(
+    { ...args, service },
+    "user",
+    args.userNameWithPath,
+  );
+}
+
+export function extractUser(
+  arn: ARN,
+): Output<SubResourceParts<"userNameWithPath">> {
+  return extractARNPartsWithResourceType(arn, "user", "userNameWithPath");
 }

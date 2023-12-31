@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
+import { Input } from "@pulumi/pulumi";
+
 export function hasKey<Key extends PropertyKey>(
   value: unknown,
   key: Key,
@@ -72,3 +74,7 @@ export function mapRecord<A, B extends PropertyKey, C>(
   }
   return result;
 }
+
+export type Inputs<A> = {
+  [K in keyof A]: Input<A[K]>;
+};

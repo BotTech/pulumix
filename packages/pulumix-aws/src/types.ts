@@ -9,11 +9,11 @@ import {
   Resource,
 } from "@pulumi/pulumi";
 import {
-  inputPropertyOrElse,
+  propertyOrSelf,
   resourceName,
   ResourceNameProperty,
 } from "@bottech/pulumix";
-import { arn, ARNProperty, AWSNamedResource } from "~/src";
+import { arn, ARNProperty, AWSNamedResource } from "./arns";
 
 export type AWSResourceNames = AWSResourceNameProperties | AWSNamedResource;
 
@@ -36,8 +36,8 @@ export type AWSIdentifiedResource = IdProperty & Resource;
 
 export type Id = Input<string | IdProperty>;
 
-export function id(id: Id): Input<string> {
-  return inputPropertyOrElse<string, IdProperty, "id">(id, "id");
+export function id(id: Id): Output<string> {
+  return output(id).apply((x) => propertyOrSelf(x, "id"));
 }
 
 export type AWSIdentifiedResourceNames =

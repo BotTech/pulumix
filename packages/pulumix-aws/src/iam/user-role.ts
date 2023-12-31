@@ -1,8 +1,9 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Input, output, Output } from "@pulumi/pulumi";
-import { arns, ARNs, extractARNAccountId, tags } from "~/src";
+import { arns, tags } from "~/src";
 import * as policies from "./policies";
+import { ARNs, extractAccountId } from "~/src/arns";
 
 export interface UserRoleArgs {
   description: Input<string>;
@@ -23,9 +24,11 @@ export class UserRole extends pulumi.ComponentResource {
 
     const childOpts = { ...opts, parent: this };
 
-    const accountIds: Output<string[]> = arns(args.groupArns).apply((arns) => {
-      return output(arns.map(extractARNAccountId));
-    });
+    const accountIds: Output<string[]> = arns
+      .arns(args.groupArns)
+      .apply((arns) => {
+        return output(arns.map(extractAccountId));
+      });
 
     this.role = new aws.iam.Role(
       name,
@@ -51,7 +54,7 @@ export class UserRole extends pulumi.ComponentResource {
     // TODO: Check names.
 
     if (args.policyArns !== undefined) {
-      arns(args.policyArns).apply((arns) =>
+      arns.arns(args.policyArns).apply((arns) =>
         arns.map(
           (arn, i) =>
             new aws.iam.RolePolicyAttachment(

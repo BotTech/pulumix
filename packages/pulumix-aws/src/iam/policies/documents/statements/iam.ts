@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
-import { arns, ARNs } from "~/src";
+import { arns } from "~/src";
 import * as conditions from "./conditions";
-import * as resources from "../../../../resources";
 import * as statements from "./statements";
+import { ARNs } from "~/src/arns";
 
 // These are from https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage.html.
 
@@ -49,7 +49,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
     return statements.allowResourceActions({
       Sid: "AllowManageOwnPasswords",
       Action: allowManageOwnPasswordsActions,
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -63,7 +63,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ListAccessKeys",
         "iam:UpdateAccessKey",
       ],
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -77,7 +77,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:UpdateSigningCertificate",
         "iam:UploadSigningCertificate",
       ],
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -92,7 +92,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:UpdateSSHPublicKey",
         "iam:UploadSSHPublicKey",
       ],
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -107,7 +107,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ResetServiceSpecificCredential",
         "iam:UpdateServiceSpecificCredential",
       ],
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -116,7 +116,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
     return statements.allowResourceActions({
       Sid: "AllowManageOwnVirtualMFADevice",
       Action: ["iam:CreateVirtualMFADevice", "iam:DeleteVirtualMFADevice"],
-      Resource: resources.iam.ownMFA,
+      Resource: arns.iam.ownMFA,
       mfaPresent: false,
     });
   }
@@ -130,7 +130,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ListMFADevices",
         "iam:ResyncMFADevice",
       ],
-      Resource: resources.iam.ownUser,
+      Resource: arns.iam.ownUser,
       mfaPresent: false,
     });
   }
@@ -160,7 +160,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
   assumeRole(roles: ARNs): aws.iam.PolicyStatement {
     return statements.allowResourceActions({
       Action: "sts:AssumeRole",
-      Resource: arns(roles),
+      Resource: arns.arns(roles),
       // This doesn't have an MFA condition as it has to go on the role trust policy instead.
       mfaPresent: false,
     });

@@ -1,10 +1,11 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Input } from "@pulumi/pulumi";
-import { arns, ARNs, mapInputs } from "~/src";
+import { arns, mapInputs } from "~/src";
+import { ARNs } from "~/src/arns";
 
 export function awsPrincipals(principalARNs: ARNs): aws.iam.AWSPrincipal {
-  return { AWS: arns(principalARNs) };
+  return { AWS: arns.arns(principalARNs) };
 }
 
 export function services(

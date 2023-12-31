@@ -3,7 +3,8 @@ import * as statements from "./statements";
 import { AccessPatternArgs, allowResourceActions } from "./statements";
 import { Input } from "@pulumi/pulumi";
 import * as pulumi from "@pulumi/pulumi";
-import { arn, ARN } from "~/src";
+import { ARN } from "~/src";
+import { arn } from "~/src/arns";
 
 type BucketArgs = {
   /**
