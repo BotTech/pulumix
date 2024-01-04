@@ -2,9 +2,14 @@
 
 import { Output } from "@pulumi/pulumi";
 import {
+  ARN,
+  extractARNPartsWithFixedSubResource,
+  extractARNPartsWithNestedSubResource,
+  extractARNPartsWithResource,
+  extractARNPartsWithTypedNestedSubResource,
+  extractARNPartsWithTypedSubResource,
   interpolateARN,
-  interpolateARNWithResourceType,
-  interpolateResourceType,
+  interpolateARNWithSubResource,
   WithPart,
 } from "~/src/arns/index";
 import { Inputs } from "@bottech/pulumix";
@@ -46,10 +51,20 @@ const objectLambdaService = "s3-object-lambda";
 export function accessPoint(
   args: SubResourceArgs<"accessPointName">,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service },
     "accesspoint",
     args.accessPointName,
+  );
+}
+
+export function extractAccessPoint(
+  arn: ARN,
+): Output<SubResourceParts<"accessPointName">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    "accesspoint",
+    "accessPointName",
   );
 }
 
@@ -59,12 +74,18 @@ export function bucket(
   return interpolateARN({ ...args, service, resource: args.bucketName });
 }
 
+export function extractBucket(
+  arn: ARN,
+): Output<UniqueSubResourceParts<"bucketName">> {
+  return extractARNPartsWithResource(arn, "bucketName");
+}
+
 type ObjectParts = Parts & { bucketName: string; objectName: string };
 
 type ObjectArgs = Inputs<ObjectParts>;
 
 export function object(args: ObjectArgs) {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     {
       ...args,
       service,
@@ -74,107 +95,177 @@ export function object(args: ObjectArgs) {
   );
 }
 
+export function extractObject(arn: ARN): Output<ObjectParts> {
+  return extractARNPartsWithNestedSubResource(arn, "bucketName", "objectName");
+}
+
 export function job(args: SubResourceArgs<"jobId">): Output<string> {
-  return interpolateARNWithResourceType(
-    { ...args, service },
-    "job",
-    args.jobId,
-  );
+  return interpolateARNWithSubResource({ ...args, service }, "job", args.jobId);
+}
+
+export function extractJob(arn: ARN): Output<SubResourceParts<"jobId">> {
+  return extractARNPartsWithTypedSubResource(arn, "job", "jobId");
 }
 
 export function storageLensConfiguration(
   args: SubResourceArgs<"configId">,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service },
     "storage-lens",
     args.configId,
   );
 }
 
+export function extractStorageLensConfiguration(
+  arn: ARN,
+): Output<SubResourceParts<"configId">> {
+  return extractARNPartsWithTypedSubResource(arn, "storage-lens", "configId");
+}
+
 export function storageLensGroup(
   args: SubResourceArgs<"groupName">,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service },
     "storage-lens-group",
     args.groupName,
   );
 }
 
+export function extractStorageLensGroup(
+  arn: ARN,
+): Output<SubResourceParts<"groupName">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    "storage-lens-group",
+    "groupName",
+  );
+}
+
 export function objectLambdaAccessPoint(
   args: SubResourceArgs<"accessPointName">,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service: objectLambdaService },
     "accesspoint",
     args.accessPointName,
   );
 }
 
+export function extractObjectLambdaAccessPoint(
+  arn: ARN,
+): Output<SubResourceParts<"accessPointName">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    "accesspoint",
+    "accessPointName",
+  );
+}
+
 export function multiRegionAccessPoint(
   args: GlobalSubResourceArgs<"accessPointAlias">,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service },
     "accesspoint",
     args.accessPointAlias,
   );
 }
 
+export function extractMultiRegionAccessPoint(
+  arn: ARN,
+): Output<GlobalSubResourceParts<"accessPointAlias">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    "accesspoint",
+    "accessPointAlias",
+  );
+}
+
 export function multiRegionAccessPointRequestARN(
   args: GlobalSubResourceArgs<"operation" | "token">,
 ) {
-  const resource = interpolateResourceType(
+  return interpolateARNWithSubResource(
+    { ...args, service, region: "us-west-2" },
     "async-request",
     "mrap",
     args.operation,
     args.token,
   );
-  return interpolateARN({
-    ...args,
-    service,
-    region: "us-west-2",
-    resource,
-  });
+}
+
+export function extractMultiRegionAccessPointRequestARN(
+  arn: ARN,
+): Output<GlobalSubResourceParts<"operation" | "token">> {
+  return extractARNPartsWithTypedNestedSubResource(
+    arn,
+    ["async-request", "mrap"],
+    "operation",
+    "token",
+  );
 }
 
 export function accessGrantsInstance(
   args: SubResourceArgs<never>,
 ): Output<string> {
-  return interpolateARNWithResourceType(
+  return interpolateARNWithSubResource(
     { ...args, service },
     "access-grants",
     "default",
   );
 }
 
+export function extractAccessGrantsInstance(
+  arn: ARN,
+): Output<SubResourceParts<never>> {
+  return extractARNPartsWithFixedSubResource(arn, ["access-grants", "default"]);
+}
+
 export function accessGrantsLocation(
   args: SubResourceArgs<"token">,
 ): Output<string> {
-  const resource = interpolateResourceType(
+  return interpolateARNWithSubResource(
+    {
+      ...args,
+      service,
+    },
     "access-grants",
     "default",
     "location",
     args.token,
   );
-  return interpolateARN({
-    ...args,
-    service,
-    resource,
-  });
+}
+
+export function extractAccessGrantsLocation(
+  arn: ARN,
+): Output<SubResourceParts<"token">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    ["access-grants", "default", "location"],
+    "token",
+  );
 }
 
 export function accessGrant(args: SubResourceArgs<"token">): Output<string> {
-  const resource = interpolateResourceType(
+  return interpolateARNWithSubResource(
+    {
+      ...args,
+      service,
+    },
     "access-grants",
     "default",
     "grant",
     args.token,
   );
-  return interpolateARN({
-    ...args,
-    service,
-    resource,
-  });
+}
+
+export function extractAccessGrant(
+  arn: ARN,
+): Output<SubResourceParts<"token">> {
+  return extractARNPartsWithTypedSubResource(
+    arn,
+    ["access-grants", "default", "grant"],
+    "token",
+  );
 }

@@ -29,6 +29,15 @@ export function kv<K extends PropertyKey, V>(
   return { [k]: v } as any;
 }
 
+export function kv2<K1 extends PropertyKey, V1, K2 extends PropertyKey, V2>(
+  k1: K1,
+  v1: V1,
+  k2: K2,
+  v2: V2,
+): { [P in K1]: { [Q in P]: V1 } }[K1] & { [P in K2]: { [Q in P]: V2 } }[K2] {
+  return { [k1]: v1, [k2]: v2 } as any;
+}
+
 export function mapKeys<A, B extends PropertyKey>(
   record: A,
   f: (key: keyof A, value: A[keyof A]) => B,
