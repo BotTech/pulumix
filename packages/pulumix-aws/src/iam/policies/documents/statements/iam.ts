@@ -49,7 +49,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
     return statements.allowResourceActions({
       Sid: "AllowManageOwnPasswords",
       Action: allowManageOwnPasswordsActions,
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }
@@ -63,7 +63,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ListAccessKeys",
         "iam:UpdateAccessKey",
       ],
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }
@@ -77,7 +77,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:UpdateSigningCertificate",
         "iam:UploadSigningCertificate",
       ],
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }
@@ -92,7 +92,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:UpdateSSHPublicKey",
         "iam:UploadSSHPublicKey",
       ],
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }
@@ -107,7 +107,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ResetServiceSpecificCredential",
         "iam:UpdateServiceSpecificCredential",
       ],
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }
@@ -116,7 +116,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
     return statements.allowResourceActions({
       Sid: "AllowManageOwnVirtualMFADevice",
       Action: ["iam:CreateVirtualMFADevice", "iam:DeleteVirtualMFADevice"],
-      Resource: arns.iam.ownMFA,
+      Resource: arns.iam.ownMFAARN,
       mfaPresent: false,
     });
   }
@@ -130,7 +130,7 @@ export class IAMAccessPatterns extends statements.AccessPatterns {
         "iam:ListMFADevices",
         "iam:ResyncMFADevice",
       ],
-      Resource: arns.iam.ownUser,
+      Resource: arns.iam.ownUserARN,
       mfaPresent: false,
     });
   }

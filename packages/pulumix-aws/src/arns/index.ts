@@ -2,12 +2,11 @@ import * as pulumi from "@pulumi/pulumi";
 import { all, Input, output, Output, Resource } from "@pulumi/pulumi";
 import { Inputs, kv, kv2, propertyOrSelf } from "@bottech/pulumix";
 
-import * as iam from "./iam";
-import * as s3 from "./s3";
 import { splitFirst } from "~/src/string";
 import { oneOrMany } from "~/src/array";
 
-export { iam, s3 };
+export * as iam from "./iam";
+export * as s3 from "./s3";
 
 // https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 
@@ -142,7 +141,7 @@ export function interpolateARNWithQualifiedResource(
 // TODO: These extract functions should check the service name.
 
 // TODO: Rename arn and name these args arn instead.
-export function extractARNParts(arnWithAccountId: ARN): Output<ARNParts> {
+export function parseARN(arnWithAccountId: ARN): Output<ARNParts> {
   return arn(arnWithAccountId).apply((arn) => {
     const [, partition, service, region, accountId, ...resources] = arn.split(
       QUALIFIED_RESOURCE_SEPARATOR,
@@ -159,11 +158,11 @@ export function extractARNParts(arnWithAccountId: ARN): Output<ARNParts> {
   });
 }
 
-export function extractARNPartsMap<A>(
+export function parseARNMap<A>(
   arnWithAccountId: ARN,
   f: (parts: ARNParts) => A,
 ): Output<ARNParts & A> {
-  return extractARNParts(arnWithAccountId).apply((parts) => {
+  return parseARN(arnWithAccountId).apply((parts) => {
     return {
       ...parts,
       ...f(parts),
@@ -171,18 +170,18 @@ export function extractARNPartsMap<A>(
   });
 }
 
-export function extractAccountId(arn: ARN): Output<string> {
-  return extractARNParts(arn).accountId;
+export function parseAccountId(arn: ARN): Output<string> {
+  return parseARN(arn).accountId;
 }
 
 /**
  * Example format: `arn:${Partition}:s3:::${BucketName}`
  */
-export function extractARNPartsWithResource<ResourceKey extends PropertyKey>(
+export function parseARNWithResource<ResourceKey extends PropertyKey>(
   arnWithAccountId: ARN,
   resourceKey: ResourceKey,
 ): Output<WithPart<ARNParts, ResourceKey>> {
-  return extractARNPartsMap(arnWithAccountId, (parts) => {
+  return parseARNMap(arnWithAccountId, (parts) => {
     return {
       ...parts,
       ...kv(resourceKey, parts.resource),
@@ -193,7 +192,7 @@ export function extractARNPartsWithResource<ResourceKey extends PropertyKey>(
 /**
  * Example format: `arn:${Partition}:s3:::${BucketName}/${ObjectName}`
  */
-function extractARNPartsWithNestedResource<
+function parseARNWithNestedResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -202,7 +201,7 @@ function extractARNPartsWithNestedResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsMap(arnWithAccountId, (parts) => {
+  return parseARNMap(arnWithAccountId, (parts) => {
     const [parentResourceId, subResourceId] = splitFirst(
       parts.resource,
       separator,
@@ -216,7 +215,7 @@ function extractARNPartsWithNestedResource<
   });
 }
 
-export function extractARNPartsWithNestedSubResource<
+export function parseARNWithNestedSubResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -224,7 +223,7 @@ export function extractARNPartsWithNestedSubResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsWithNestedResource(
+  return parseARNWithNestedResource(
     arnWithAccountId,
     SUB_RESOURCE_SEPARATOR,
     parentResourceKey,
@@ -232,7 +231,7 @@ export function extractARNPartsWithNestedSubResource<
   );
 }
 
-export function extractARNPartsWithNestedQualifiedResource<
+export function parseARNWithNestedQualifiedResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -240,7 +239,7 @@ export function extractARNPartsWithNestedQualifiedResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsWithNestedResource(
+  return parseARNWithNestedResource(
     arnWithAccountId,
     QUALIFIED_RESOURCE_SEPARATOR,
     parentResourceKey,
@@ -269,12 +268,12 @@ function checkResourceTypes(
 /**
  * Example format: `arn:${Partition}:s3:${Region}:${Account}:access-grants/default
  */
-function extractARNPartsWithFixedResource(
+function parseARNWithFixedResource(
   arnWithAccountId: ARN,
   resourceType: string | string[],
   separator: string,
 ): Output<ARNParts> {
-  return extractARNParts(arnWithAccountId).apply((parts) => {
+  return parseARN(arnWithAccountId).apply((parts) => {
     const resourceParts = parts.resource.split(separator);
     const resourceTypes = oneOrMany(resourceType);
     checkResourceTypes(resourceParts, resourceTypes, parts.arn);
@@ -282,22 +281,22 @@ function extractARNPartsWithFixedResource(
   });
 }
 
-export function extractARNPartsWithFixedSubResource(
+export function parseARNWithFixedSubResource(
   arnWithAccountId: ARN,
   resourceType: string | string[],
 ): Output<ARNParts> {
-  return extractARNPartsWithFixedResource(
+  return parseARNWithFixedResource(
     arnWithAccountId,
     resourceType,
     SUB_RESOURCE_SEPARATOR,
   );
 }
 
-export function extractARNPartsWithFixedQualifiedResource(
+export function parseARNWithFixedQualifiedResource(
   arnWithAccountId: ARN,
   resourceType: string | string[],
 ): Output<ARNParts> {
-  return extractARNPartsWithFixedResource(
+  return parseARNWithFixedResource(
     arnWithAccountId,
     resourceType,
     QUALIFIED_RESOURCE_SEPARATOR,
@@ -307,13 +306,13 @@ export function extractARNPartsWithFixedQualifiedResource(
 /**
  * Example format: `arn:${Partition}:s3:${Region}:${Account}:job/${JobId}`
  */
-function extractARNPartsWithTypedResource<ResourceKey extends PropertyKey>(
+function parseARNWithTypedResource<ResourceKey extends PropertyKey>(
   arnWithAccountId: ARN,
   resourceType: string | string[],
   separator: string,
   resourceKey: ResourceKey,
 ): Output<WithPart<ARNParts, ResourceKey>> {
-  return extractARNPartsMap(arnWithAccountId, (parts) => {
+  return parseARNMap(arnWithAccountId, (parts) => {
     const resourceParts = parts.resource.split(separator);
     const resourceTypes = oneOrMany(resourceType);
     checkResourceTypes(resourceParts, resourceTypes, parts.arn);
@@ -324,14 +323,12 @@ function extractARNPartsWithTypedResource<ResourceKey extends PropertyKey>(
   });
 }
 
-export function extractARNPartsWithTypedSubResource<
-  ResourceKey extends PropertyKey,
->(
+export function parseARNWithTypedSubResource<ResourceKey extends PropertyKey>(
   arnWithAccountId: ARN,
   resourceType: string | string[],
   resourceKey: ResourceKey,
 ): Output<WithPart<ARNParts, ResourceKey>> {
-  return extractARNPartsWithTypedResource(
+  return parseARNWithTypedResource(
     arnWithAccountId,
     resourceType,
     SUB_RESOURCE_SEPARATOR,
@@ -339,14 +336,14 @@ export function extractARNPartsWithTypedSubResource<
   );
 }
 
-export function extractARNPartsWithTypedQualifiedResource<
+export function parseARNWithTypedQualifiedResource<
   ResourceKey extends PropertyKey,
 >(
   arnWithAccountId: ARN,
   resourceType: string | string[],
   resourceKey: ResourceKey,
 ): Output<WithPart<ARNParts, ResourceKey>> {
-  return extractARNPartsWithTypedResource(
+  return parseARNWithTypedResource(
     arnWithAccountId,
     resourceType,
     QUALIFIED_RESOURCE_SEPARATOR,
@@ -357,7 +354,7 @@ export function extractARNPartsWithTypedQualifiedResource<
 /**
  * Example format: `arn:${Partition}:lambda:${Region}:${Account}:function:${FunctionName}:${Alias}`
  */
-function extractARNPartsWithTypedNestedResource<
+function parseARNWithTypedNestedResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -367,7 +364,7 @@ function extractARNPartsWithTypedNestedResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsMap(arnWithAccountId, (parts) => {
+  return parseARNMap(arnWithAccountId, (parts) => {
     const resourceParts = parts.resource.split(separator);
     const resourceTypes = oneOrMany(resourceType);
     checkResourceTypes(resourceParts, resourceTypes, parts.arn);
@@ -384,7 +381,7 @@ function extractARNPartsWithTypedNestedResource<
   });
 }
 
-export function extractARNPartsWithTypedNestedSubResource<
+export function parseARNWithTypedNestedSubResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -393,7 +390,7 @@ export function extractARNPartsWithTypedNestedSubResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsWithTypedNestedResource(
+  return parseARNWithTypedNestedResource(
     arnWithAccountId,
     resourceType,
     SUB_RESOURCE_SEPARATOR,
@@ -402,7 +399,7 @@ export function extractARNPartsWithTypedNestedSubResource<
   );
 }
 
-export function extractARNPartsWithTypedNestedQualifiedResource<
+export function parseARNWithTypedNestedQualifiedResource<
   ParentResourceKey extends PropertyKey,
   SubResourceKey extends PropertyKey,
 >(
@@ -411,7 +408,7 @@ export function extractARNPartsWithTypedNestedQualifiedResource<
   parentResourceKey: ParentResourceKey,
   subResourceKey: SubResourceKey,
 ): Output<WithPart<ARNParts, ParentResourceKey | SubResourceKey>> {
-  return extractARNPartsWithTypedNestedResource(
+  return parseARNWithTypedNestedResource(
     arnWithAccountId,
     resourceType,
     QUALIFIED_RESOURCE_SEPARATOR,

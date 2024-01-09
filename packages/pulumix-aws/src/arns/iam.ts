@@ -4,8 +4,8 @@ import { Output } from "@pulumi/pulumi";
 import { ARN } from "~/src";
 
 import {
-  extractARNPartsWithTypedNestedSubResource,
-  extractARNPartsWithTypedSubResource,
+  parseARNWithTypedNestedSubResource,
+  parseARNWithTypedSubResource,
   interpolateARN,
   interpolateARNWithSubResource,
   interpolateSubResource,
@@ -14,7 +14,7 @@ import {
 import { Inputs } from "@bottech/pulumix";
 
 type Parts = {
-  partition: string;
+  partition?: string;
   accountId: string;
 };
 
@@ -25,12 +25,12 @@ type SubResourceArgs<Part extends string> = Inputs<SubResourceParts<Part>>;
 const service = "iam";
 
 // TODO: This should ideally be a function that takes a partition.
-export const ownMFA = "arn:aws:iam::*:mfa/${aws:username}";
+export const ownMFAARN = "arn:aws:iam::*:mfa/${aws:username}";
 
 // TODO: This should ideally be a function that takes a partition.
-export const ownUser = "arn:aws:iam::*:user/${aws:username}";
+export const ownUserARN = "arn:aws:iam::*:user/${aws:username}";
 
-export function accessReport(
+export function interpolateAccessReportARN(
   args: SubResourceArgs<"entityPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -40,17 +40,13 @@ export function accessReport(
   );
 }
 
-export function extractAccessReport(
+export function parseAccessReportARN(
   arn: ARN,
 ): Output<SubResourceParts<"entityPath">> {
-  return extractARNPartsWithTypedSubResource(
-    arn,
-    "access-report",
-    "entityPath",
-  );
+  return parseARNWithTypedSubResource(arn, "access-report", "entityPath");
 }
 
-export function assumedRole(
+export function interpolateAssumedRoleARN(
   args: SubResourceArgs<"roleName" | "roleSessionName">,
 ): Output<string> {
   const resource = interpolateSubResource(
@@ -61,10 +57,10 @@ export function assumedRole(
   return interpolateARN({ ...args, service, resource });
 }
 
-export function extractAssumedRole(
+export function parseAssumedRoleARN(
   arn: ARN,
 ): Output<SubResourceParts<"roleName" | "roleSessionName">> {
-  return extractARNPartsWithTypedNestedSubResource(
+  return parseARNWithTypedNestedSubResource(
     arn,
     "assumed-role",
     "roleName",
@@ -72,7 +68,7 @@ export function extractAssumedRole(
   );
 }
 
-export function federatedUser(
+export function interpolateFederatedUserARN(
   args: SubResourceArgs<"userName">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -82,13 +78,13 @@ export function federatedUser(
   );
 }
 
-export function extractFederatedUser(
+export function parseFederatedUserARN(
   arn: ARN,
 ): Output<SubResourceParts<"userName">> {
-  return extractARNPartsWithTypedSubResource(arn, "federated-user", "userName");
+  return parseARNWithTypedSubResource(arn, "federated-user", "userName");
 }
 
-export function group(
+export function interpolateGroupARN(
   args: SubResourceArgs<"groupNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -98,13 +94,13 @@ export function group(
   );
 }
 
-export function extractGroup(
+export function parseGroupARN(
   arn: ARN,
 ): Output<SubResourceParts<"groupNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(arn, "group", "groupNameWithPath");
+  return parseARNWithTypedSubResource(arn, "group", "groupNameWithPath");
 }
 
-export function instanceProfile(
+export function interpolateInstanceProfileARN(
   args: SubResourceArgs<"instanceProfileNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -114,17 +110,17 @@ export function instanceProfile(
   );
 }
 
-export function extractInstanceProfile(
+export function parseInstanceProfileARN(
   arn: ARN,
 ): Output<SubResourceParts<"instanceProfileNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(
+  return parseARNWithTypedSubResource(
     arn,
     "instance-profile",
     "instanceProfileNameWithPath",
   );
 }
 
-export function mfa(
+export function interpolateMFAARN(
   args: SubResourceArgs<"mfaTokenIdWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -134,13 +130,13 @@ export function mfa(
   );
 }
 
-export function extractMfa(
+export function parseMFAARN(
   arn: ARN,
 ): Output<SubResourceParts<"mfaTokenIdWithPath">> {
-  return extractARNPartsWithTypedSubResource(arn, "mfa", "mfaTokenIdWithPath");
+  return parseARNWithTypedSubResource(arn, "mfa", "mfaTokenIdWithPath");
 }
 
-export function oidcProvider(
+export function interpolateOIDCProviderARN(
   args: SubResourceArgs<"oidcProviderName">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -150,17 +146,13 @@ export function oidcProvider(
   );
 }
 
-export function extractOidcProvider(
+export function parseOIDCProviderARN(
   arn: ARN,
 ): Output<SubResourceParts<"oidcProviderName">> {
-  return extractARNPartsWithTypedSubResource(
-    arn,
-    "oidc-provider",
-    "oidcProviderName",
-  );
+  return parseARNWithTypedSubResource(arn, "oidc-provider", "oidcProviderName");
 }
 
-export function policy(
+export function interpolatePolicyARN(
   args: SubResourceArgs<"policyNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -170,17 +162,13 @@ export function policy(
   );
 }
 
-export function extractPolicy(
+export function parsePolicyARN(
   arn: ARN,
 ): Output<SubResourceParts<"policyNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(
-    arn,
-    "policy",
-    "policyNameWithPath",
-  );
+  return parseARNWithTypedSubResource(arn, "policy", "policyNameWithPath");
 }
 
-export function role(
+export function interpolateRoleARN(
   args: SubResourceArgs<"roleNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -190,13 +178,13 @@ export function role(
   );
 }
 
-export function extractRole(
+export function parseRoleARN(
   arn: ARN,
 ): Output<SubResourceParts<"roleNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(arn, "role", "roleNameWithPath");
+  return parseARNWithTypedSubResource(arn, "role", "roleNameWithPath");
 }
 
-export function samlProvider(
+export function interpolateSAMLProviderARN(
   args: SubResourceArgs<"samlProviderName">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -206,17 +194,13 @@ export function samlProvider(
   );
 }
 
-export function extractSamlProvider(
+export function parseSAMLProviderARN(
   arn: ARN,
 ): Output<SubResourceParts<"samlProviderName">> {
-  return extractARNPartsWithTypedSubResource(
-    arn,
-    "saml-provider",
-    "samlProviderName",
-  );
+  return parseARNWithTypedSubResource(arn, "saml-provider", "samlProviderName");
 }
 
-export function serverCertificate(
+export function interpolateServerCertificateARN(
   args: SubResourceArgs<"certificateNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -226,17 +210,17 @@ export function serverCertificate(
   );
 }
 
-export function extractServerCertificate(
+export function parseServerCertificateARN(
   arn: ARN,
 ): Output<SubResourceParts<"certificateNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(
+  return parseARNWithTypedSubResource(
     arn,
     "service-certificate",
     "certificateNameWithPath",
   );
 }
 
-export function smsMfa(
+export function interpolateSMSMFAARN(
   args: SubResourceArgs<"mfaTokenIdWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -246,17 +230,13 @@ export function smsMfa(
   );
 }
 
-export function extractSmsMfa(
+export function parseSMSMFAARN(
   arn: ARN,
 ): Output<SubResourceParts<"mfaTokenIdWithPath">> {
-  return extractARNPartsWithTypedSubResource(
-    arn,
-    "sms-mfa",
-    "mfaTokenIdWithPath",
-  );
+  return parseARNWithTypedSubResource(arn, "sms-mfa", "mfaTokenIdWithPath");
 }
 
-export function user(
+export function interpolateUserARN(
   args: SubResourceArgs<"userNameWithPath">,
 ): Output<string> {
   return interpolateARNWithSubResource(
@@ -266,8 +246,8 @@ export function user(
   );
 }
 
-export function extractUser(
+export function parseUserARN(
   arn: ARN,
 ): Output<SubResourceParts<"userNameWithPath">> {
-  return extractARNPartsWithTypedSubResource(arn, "user", "userNameWithPath");
+  return parseARNWithTypedSubResource(arn, "user", "userNameWithPath");
 }
