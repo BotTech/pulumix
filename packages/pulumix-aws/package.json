@@ -13,13 +13,18 @@
   "scripts": {
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",
+    "generate": "ts-node scripts/create-taggable.ts",
     "test": "echo No tests."
   },
   "dependencies": {
     "@bottech/pulumix": "0.1.0"
   },
   "peerDependencies": {
-    "@pulumi/aws": "^5.41.0",
-    "@pulumi/pulumi": "^3.74.0"
+    "@pulumi/aws": "^6.29.0",
+    "@pulumi/pulumi": "^3.112.0"
+  },
+  "devDependencies": {
+    "ts-morph": "^22.0.0",
+    "ts-node": "^10.9.2"
   }
 }
