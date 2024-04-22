@@ -1,7 +1,7 @@
-import { TAGGABLE_TYPES } from "./taggable-types";
-
 import * as pulumi from "@pulumi/pulumi";
-import { ResourceTransformationArgs } from "@pulumi/pulumi/resource";
+
+import { TAGGABLE_TYPES } from "./taggable-types";
+export * from "./taggable-types";
 
 export type Tags = pulumi.Input<{
   [key: string]: pulumi.Input<string>;
@@ -11,12 +11,13 @@ export type TaggableProps = {
   tags?: Tags;
 };
 
-export type TaggableResourceTransformationArgs = ResourceTransformationArgs & {
-  props: TaggableProps;
-};
+export type TaggableResourceTransformationArgs =
+  pulumi.ResourceTransformationArgs & {
+    props: TaggableProps;
+  };
 
 export function isTaggableResourceTransformation(
-  args: ResourceTransformationArgs,
+  args: pulumi.ResourceTransformationArgs,
 ): args is TaggableResourceTransformationArgs {
   return TAGGABLE_TYPES.includes(args.type);
 }
