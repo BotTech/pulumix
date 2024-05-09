@@ -1,9 +1,10 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Input, output, Output } from "@pulumi/pulumi";
+import { Input, Output } from "@pulumi/pulumi";
 import { arns, tags } from "~/src";
 import * as policies from "./policies";
 import { ARNs, parseAccountId } from "~/src/arns";
+import { parseGroupARN } from "~/src/arns/iam";
 
 export interface UserRoleArgs {
   description: Input<string>;
@@ -27,7 +28,7 @@ export class UserRole extends pulumi.ComponentResource {
     const accountIds: Output<string[]> = arns
       .arns(args.groupArns)
       .apply((arns) => {
-        return output(arns.map(parseAccountId));
+        return pulumi.output(arns.map(parseAccountId));
       });
 
     this.role = new aws.iam.Role(
@@ -51,39 +52,32 @@ export class UserRole extends pulumi.ComponentResource {
       childOpts,
     );
 
-    // TODO: Check names.
+    arns.arns(args.policyArns).apply((arns) =>
+      arns.map(
+        (policyArn, i) =>
+          new aws.iam.RolePolicyAttachment(
+            `${name}${i}`,
+            {
+              role: this.role.name,
+              policyArn: policyArn,
+            },
+            childOpts,
+          ),
+      ),
+    );
 
-    if (args.policyArns !== undefined) {
-      arns.arns(args.policyArns).apply((arns) =>
-        arns.map(
-          (arn, i) =>
-            new aws.iam.RolePolicyAttachment(
-              `${name}${i}`,
-              {
-                role: this.role.name,
-                policyArn: arn,
-              },
-              childOpts,
-            ),
-        ),
-      );
-    }
-
-    // TODO: We need this.
-    // if (args.groupNames !== undefined) {
-    //   output(args.groupNames).apply((groupNames) =>
-    //     groupNames.map(
-    //       (groupName, i) =>
-    //         new aws.iam.GroupPolicyAttachment(
-    //           `${name}${i}`,
-    //           {
-    //             group: groupName,
-    //             policyArn: this.assumeRolePolicy.arn,
-    //           },
-    //           childOpts
-    //         )
-    //     )
-    //   );
-    // }
+    arns.arns(args.groupArns).apply((arns) =>
+      arns.map((groupArn, i) => {
+        const arnParts = parseGroupARN(groupArn);
+        return new aws.iam.GroupPolicyAttachment(
+          `${name}${i}`,
+          {
+            group: arnParts.groupNameWithPath,
+            policyArn: this.assumeRolePolicy.arn,
+          },
+          childOpts,
+        );
+      }),
+    );
   }
 }
