@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { all, Input, output, Output, Resource } from "@pulumi/pulumi";
+import { Input, output, Output, Resource } from "@pulumi/pulumi";
 import { Inputs, kv, kv2, propertyOrSelf } from "@bottech/pulumix";
 
 import { splitFirst } from "~/src/string";
@@ -29,7 +29,7 @@ export type ARNs = Input<ARN | ARN[]>;
 export function arns(arns: ARNs): Output<string[]> {
   return output(arns).apply((arns) => {
     if (Array.isArray(arns)) {
-      return all(arns.map(arn));
+      return pulumi.output(arns.map(arn));
     } else {
       return arn(arns).apply((arn) => [arn]);
     }
