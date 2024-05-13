@@ -21,10 +21,7 @@
   },
   "peerDependencies": {
     "@pulumi/aws": "^6.29.0",
-    "@pulumi/pulumi": "^3.112.0"
-  },
-  "devDependencies": {
-    "ts-morph": "^22.0.0",
-    "ts-node": "^10.9.2"
+    "@pulumi/pulumi": "^3.112.0",
+    "@pulumi/policy": "^1.11.0"
   }
 }
