@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig-base",
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/**/*.json",
+    "types/**/*"
   ],
   "compilerOptions": {
     "outDir": "dist",
@@ -9,7 +11,12 @@
       "~/*": [
         "./*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./types"
+    ],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "references": []
 }
