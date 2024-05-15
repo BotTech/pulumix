@@ -6,6 +6,9 @@ import fs from "fs/promises";
 import type { JSONSchemaType } from "ajv/lib/types/json-schema";
 
 const ajv = new Ajv({
+  schemas: {
+    "https://json-schema.org/draft/2020-12/schema": baseSchema,
+  },
   loadSchema: async (uri) => {
     if (uri === "https://json-schema.org/draft/2020-12/schema")
       return baseSchema;
