@@ -1,11 +1,17 @@
 import { DeploymentResourcePlan, PulumiPlan } from "~/types/plan";
 import Ajv, { ValidateFunction } from "ajv";
+import * as baseSchema from "./2020-12.json";
 import * as planSchema from "./plan.json";
 import fs from "fs/promises";
 import type { JSONSchemaType } from "ajv/lib/types/json-schema";
 
 const ajv = new Ajv({
-  loadSchema: (uri) => fs.readFile(uri, "utf8").then(JSON.parse),
+  loadSchema: async (uri) => {
+    if (uri === "https://json-schema.org/draft/2020-12/schema")
+      return baseSchema;
+    const text = await fs.readFile(uri, "utf8");
+    return JSON.parse(text);
+  },
 });
 
 const parserPromise: Promise<ValidateFunction<PulumiPlan>> =
