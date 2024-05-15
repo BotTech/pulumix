@@ -1,27 +1,22 @@
 import { DeploymentResourcePlan, PulumiPlan } from "~/types/plan";
-import Ajv, { ValidateFunction } from "ajv";
-import * as baseSchema from "./2020-12.json";
 import * as planSchema from "./plan.json";
 import fs from "fs/promises";
-import type { JSONSchemaType } from "ajv/lib/types/json-schema";
+import Ajv2020 from "ajv/dist/2020";
 
-const ajv = new Ajv({
-  schemas: {
-    "https://json-schema.org/draft/2020-12/schema": baseSchema,
+const ajv = new Ajv2020({
+  formats: {
+    "date-time": true,
   },
   loadSchema: async (uri) => {
-    if (uri === "https://json-schema.org/draft/2020-12/schema")
-      return baseSchema;
     const text = await fs.readFile(uri, "utf8");
     return JSON.parse(text);
   },
 });
 
-const parserPromise: Promise<ValidateFunction<PulumiPlan>> =
-  ajv.compileAsync<PulumiPlan>(planSchema as JSONSchemaType<PulumiPlan>);
-
 export async function parsePlan(path: string): Promise<PulumiPlan | undefined> {
-  const parser = await parserPromise;
+  const parser =
+    ajv.getSchema<PulumiPlan>(planSchema.$id) ??
+    ajv.compile<PulumiPlan>(planSchema);
   const data = await fs.readFile(path, "utf8").catch((reason) => {
     if (reason.code === "ENOENT") return undefined;
     else throw reason;
