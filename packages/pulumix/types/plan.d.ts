@@ -55,13 +55,13 @@ export interface PluginInfo {
   version: string;
 }
 /**
- * TODO
+ * A map from the resource URN to the plan for that resource.
  */
 export interface DeploymentResourcePlans {
   [k: string]: DeploymentResourcePlan;
 }
 /**
- * TODO
+ * The plan for a resource.
  *
  * This interface was referenced by `DeploymentResourcePlans`'s JSON-Schema definition
  * via the `patternProperty` "^urn:".

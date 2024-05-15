@@ -27,7 +27,7 @@ export class User extends pulumi.ComponentResource {
   constructor(
     name: string,
     args: UserArgs,
-    opts?: pulumi.CustomResourceOptions
+    opts?: pulumi.CustomResourceOptions,
   ) {
     super("pulumix-aws:iam:User", name, {}, opts);
 
@@ -54,10 +54,11 @@ export class User extends pulumi.ComponentResource {
     new aws.iam.UserGroupMembership(
       name,
       {
+        // TODO: Be careful with using the name. It is better to use the unique id in case the friendly name is reused.
         user: this.user.name,
         groups: userGroups.map(nameProperty),
       },
-      childOpts
+      childOpts,
     );
 
     this.loginProfile = new aws.iam.UserLoginProfile(
@@ -68,9 +69,10 @@ export class User extends pulumi.ComponentResource {
         // Do not set this to anything if importing as it will not import correctly.
         passwordResetRequired: args.import ? undefined : false,
         pgpKey: args.import ? "" : args.pgpKey,
+        // TODO: Be careful with using the name. It is better to use the unique id in case the friendly name is reused.
         user: this.user.name,
       },
-      userOpts
+      userOpts,
     );
   }
 }

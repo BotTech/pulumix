@@ -1,4 +1,5 @@
 export * from "./array";
+export * from "./plan";
 export * from "./properties";
 export * from "./record";
 export * from "./stack";

@@ -22,8 +22,10 @@
           "type": "string"
         },
         "version": {
+          "$comment": "Currently only supports version 3.",
           "description": "The version of the Pulumi engine that produced the deployment.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^v3\\."
         },
         "plugins": {
           "description": "Information about the plugins used by the deployment.",
@@ -76,7 +78,7 @@
     "resourcePlans": {
       "$comment": "See https://github.com/pulumi/pulumi/blob/516979770f11d3a426239429731cf9f327c38836/sdk/go/common/apitype/plan.go",
       "title": "Deployment Resource Plans",
-      "description": "TODO",
+      "description": "A map from the resource URN to the plan for that resource.",
       "type": "object",
       "patternProperties": {
         "^urn:": {
@@ -96,7 +98,7 @@
   "$defs": {
     "resourcePlan": {
       "title": "Deployment Resource Plan",
-      "description": "TODO",
+      "description": "The plan for a resource.",
       "type": "object",
       "properties": {
         "goal": {
