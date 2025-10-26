@@ -16,6 +16,9 @@
     "test": "echo No tests.",
     "generate-types": "json2ts -i src/plan.json -o types/plan.d.ts"
   },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
   "peerDependencies": {
     "@pulumi/pulumi": "^3.112.0"
   }

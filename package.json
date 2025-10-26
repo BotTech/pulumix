@@ -2,37 +2,34 @@
   "name": "@bottech/pulumix-root",
   "private": true,
   "devDependencies": {
-    "@types/node": "^20.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "ajv": "^8.13.0",
-    "eslint": "^8.44.0",
-    "eslint-config-prettier": "^8.8.0",
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "ajv": "^8.17.1",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-workspaces": "^0.9.0",
-    "json-schema-to-typescript": "^14.0.4",
-    "npm-check-updates": "^16.10.15",
-    "prettier": "^3.0.0",
-    "ts-morph": "^22.0.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-workspaces": "^0.11.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "npm-check-updates": "^19.1.1",
+    "prettier": "^3.6.2",
+    "ts-morph": "^27.0.2",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.7",
-    "typescript": "^5.1.6"
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "tsc --build && npx --workspaces tsc-alias",
-    "watch": "npm run watch --workspaces",
-    "check": "npm run check --workspaces",
-    "clean": "npm run clean --workspaces",
-    "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue --fix",
-    "link": "npm link --workspaces && rm -rf node_modules/@pulumi",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue",
-    "test": "npm run test --workspaces",
-    "upgrade": "npm-check-updates --upgrade --workspaces --root && npm update"
-  },
-  "workspaces": [
-    "packages/pulumix",
-    "packages/pulumix-aws"
-  ]
+    "build": "tsc --build && pnpm --recursive exec tsc-alias",
+    "watch": "pnpm --recursive run watch",
+    "check": "pnpm --recursive run check",
+    "clean": "pnpm --recursive run clean",
+    "fix": "pnpm exec eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue --fix",
+    "link": "pnpm --recursive link && rm -rf node_modules/@pulumi",
+    "lint": "pnpm exec eslint . --ext .js,.jsx,.ts,.tsx,.html,.vue",
+    "test": "pnpm --recursive test",
+    "upgrade": "pnpm update --latest --recursive"
+  }
 }
