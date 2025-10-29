@@ -4,12 +4,30 @@
   "description": "Pulumi AWS extension module.",
   "author": "Jason Pickens <jasonpickensnz@gmail.com>",
   "license": "MIT",
-  "type": "commonjs",
-  "main": "dist/src/index.js",
+
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js",
-    "./*": "./dist/src/*.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
   },
+  "publishConfig": {
+    "access": "public"
+  },
+
   "scripts": {
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",

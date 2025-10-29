@@ -80,7 +80,7 @@ type ObjectParts = Parts & { bucketName: string; objectName: string };
 
 type ObjectArgs = Inputs<ObjectParts>;
 
-export function interpolateObjectARN(args: ObjectArgs) {
+export function interpolateObjectARN(args: ObjectArgs): Output<string> {
   return interpolateARNWithSubResource(
     {
       ...args,
@@ -171,7 +171,7 @@ export function parseMultiRegionAccessPointARN(
 
 export function interpolateMultiRegionAccessPointRequestARNARN(
   args: GlobalSubResourceArgs<"operation" | "token">,
-) {
+): Output<string> {
   return interpolateARNWithSubResource(
     { ...args, service, region: "us-west-2" },
     "async-request",

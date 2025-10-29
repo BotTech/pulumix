@@ -1,0 +1,228 @@
+{
+  "$defs": {
+    "CustomTimeouts": {
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "number"
+        },
+        "delete": {
+          "type": "number"
+        },
+        "update": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "GoalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalSecretOutputs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "checkedInputs": {
+          "type": "object"
+        },
+        "custom": {
+          "type": "boolean"
+        },
+        "customTimeouts": {
+          "$ref": "#/$defs/CustomTimeouts"
+        },
+        "deleteBeforeReplace": {
+          "type": "boolean"
+        },
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ignoreChanges": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "inputDiff": {
+          "$ref": "#/$defs/PlanDiffV1"
+        },
+        "name": {
+          "type": "string"
+        },
+        "outputDiff": {
+          "$ref": "#/$defs/PlanDiffV1"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "propertyDependencies": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "protect": {
+          "type": "boolean"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "custom",
+        "protect"
+      ],
+      "type": "object"
+    },
+    "ManifestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "magic": {
+          "type": "string"
+        },
+        "plugins": {
+          "items": {
+            "$ref": "#/$defs/PluginInfoV1"
+          },
+          "type": "array"
+        },
+        "time": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "time",
+        "magic",
+        "version"
+      ],
+      "type": "object"
+    },
+    "Map": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Value"
+      },
+      "type": "object"
+    },
+    "PlanDiffV1": {
+      "additionalProperties": false,
+      "properties": {
+        "adds": {
+          "type": "object"
+        },
+        "deletes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "updates": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "PluginInfoV1": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "path",
+        "type",
+        "version"
+      ],
+      "type": "object"
+    },
+    "ResourcePlanV1": {
+      "additionalProperties": false,
+      "properties": {
+        "goal": {
+          "$ref": "#/$defs/GoalV1"
+        },
+        "seed": {
+          "contentEncoding": "base64",
+          "type": "string"
+        },
+        "state": {
+          "type": "object"
+        },
+        "steps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object"
+    },
+    "Value": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/pulumi/pulumi/sdk/v3/go/common/apitype/deployment-plan-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "JSON schema for Pulumi deployment plan types",
+  "properties": {
+    "config": {
+      "$ref": "#/$defs/Map"
+    },
+    "manifest": {
+      "$ref": "#/$defs/ManifestV1"
+    },
+    "resourcePlans": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ResourcePlanV1"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "manifest"
+  ],
+  "title": "Pulumi Deployment Plan",
+  "type": "object"
+}

@@ -85,8 +85,12 @@ function principalAssumeRole(principalArns: ARNs): aws.iam.PolicyDocument {
   };
 }
 
-export const inline = {
+export const inline: {
+  serviceAssumeRole: typeof serviceAssumeRole;
+  accountAssumeRole: typeof accountAssumeRole;
+  principalAssumeRole: typeof principalAssumeRole;
+} = {
   serviceAssumeRole,
   accountAssumeRole,
-  principalAssumeRole,
+  principalAssumeRole
 };

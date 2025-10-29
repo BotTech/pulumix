@@ -48,8 +48,11 @@ function keyAccess(args: KeyAccessArgs): aws.iam.PolicyDocument {
   };
 }
 
-export const inline = {
+export const inline: {
+  accountGrantServiceAccess: typeof accountGrantServiceAccess;
+  keyAccess: typeof keyAccess;
+} = {
   // TODO: Should this be here or be a part of the keyAccess?
-  accountGrantServiceAccess: accountGrantServiceAccess,
-  keyAccess: keyAccess,
+  accountGrantServiceAccess,
+  keyAccess,
 };

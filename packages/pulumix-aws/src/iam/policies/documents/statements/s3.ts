@@ -41,5 +41,8 @@ class S3AccessPatterns extends statements.AccessPatterns {
   }
 }
 
-export const { readOnlyAccess, fullAccess, createBucket } =
-  new S3AccessPatterns();
+const dest = new S3AccessPatterns();
+
+export const readOnlyAccess: (args?: AccessPatternArgs) => aws.iam.PolicyStatement = dest.readOnlyAccess;
+export const fullAccess: (args?: AccessPatternArgs) => aws.iam.PolicyStatement = dest.fullAccess;
+export const createBucket: (args: CreateBucketArgs) => aws.iam.PolicyStatement = dest.createBucket;

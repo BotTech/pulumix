@@ -1,7 +1,8 @@
-import { DeploymentResourcePlan, PulumiPlan } from "~/types/plan";
-import * as planSchema from "./plan.json";
+import { getSchema, DeploymentPlanForVersion } from "@bottech/pulumix-schema";
 import fs from "fs/promises";
 import Ajv2020 from "ajv/dist/2020";
+import { version } from "@pulumi/pulumi/version"
+import { DeploymentResourcePlan } from "~/types/plan";
 
 const ajv = new Ajv2020({
   formats: {
@@ -13,21 +14,16 @@ const ajv = new Ajv2020({
   },
 });
 
-export async function parsePlan(path: string): Promise<PulumiPlan | undefined> {
-  const parser =
-    ajv.getSchema<PulumiPlan>(planSchema.$id) ??
-    ajv.compile<PulumiPlan>(planSchema);
-  const data = await fs.readFile(path, "utf8").catch((reason) => {
-    if (reason.code === "ENOENT") return undefined;
-    else throw reason;
-  });
-  if (data === undefined) {
-    return;
-  }
+export async function parsePlan(
+  path: string,
+): Promise<DeploymentPlanForVersion<typeof version>> {
+  const planSchema = getSchema(version);
+  const parser = ajv.getSchema((planSchema).$id) ??  ajv.compile(planSchema);
+  const data = await fs.readFile(path, "utf8");
   const plan = JSON.parse(data);
   const valid = parser(plan);
   if (!valid) {
-    throw `Invalid plan: ${parser.errors}`;
+    throw new Error(`Invalid plan: ${JSON.stringify(parser.errors)}`);
   }
   return plan;
 }

@@ -1,0 +1,40 @@
+{
+  "name": "@bottech/pulumix-schema",
+  "version": "0.1.0",
+  "description": "JSON schemas for Pulumi plan types.",
+  "author": "Jason Pickens <jasonpickensnz@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist schemas",
+    "generate": "cd generator && go mod download && go mod tidy && go run .",
+    "postgenerate": "tsx scripts/generate-types.ts && tsx scripts/generate-version-types.ts",
+    "postbuild": "cp -r schemas dist/",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "semver": "^7.7.3"
+  }
+}

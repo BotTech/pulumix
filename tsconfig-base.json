@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "target": "ESNext",
-    "moduleResolution": "NodeNext",
+    /* Base Options */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "declaration": true,
 
-    "composite": true,
-
+    /* Strictness */
     "strict": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    //"exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -17,6 +20,16 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true
+
+    /* Bundler Config */
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+
+    /* Project References */
+    "composite": true,
+
+    /* tsdown Requirement */
+    // This is critical for tsdown's fast declaration file generation
+    "isolatedDeclarations": true
   }
 }

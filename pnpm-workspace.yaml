@@ -1,3 +1,2 @@
 packages:
-  - 'packages/pulumix'
-  - 'packages/pulumix-aws'
+  - 'packages/*'

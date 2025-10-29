@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig-base",
+  "include": [
+    "src/**/*",
+    "schemas/**/*"
+  ],
+  "compilerOptions": {
+    "outDir": "dist",
+    "paths": {
+      "~/*": [
+        "./*"
+      ]
+    }
+  }
+}

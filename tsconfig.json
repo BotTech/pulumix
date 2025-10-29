@@ -3,6 +3,7 @@
   "include": [],
   "references": [
     { "path": "./packages/pulumix" },
-    { "path": "./packages/pulumix-aws" }
+    { "path": "./packages/pulumix-aws" },
+    { "path": "./packages/pulumix-schema" }
   ]
 }
